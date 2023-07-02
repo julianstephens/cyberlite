@@ -1,14 +1,32 @@
 {
-  "name": "node-typescript-boilerplate",
+  "name": "sqlite-clone",
   "version": "0.0.0",
-  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
   "type": "module",
   "engines": {
     "node": ">= 18.12 <19"
   },
+  "scripts": {
+    "start": "node build/main.js",
+    "clean": "rimraf coverage build tmp",
+    "prebuild": "pnpm lint",
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "build:release": "pnpm clean && tsc -p tsconfig.release.json",
+    "lint": "eslint . --ext .ts --ext .mts",
+    "test": "jest --coverage",
+    "prettier": "prettier --config .prettierrc --write .",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "node-color-readline": "^1.0.1",
+    "tslib": "~2.5",
+    "yargs": "^17.7.2"
+  },
   "devDependencies": {
     "@types/jest": "~29.5",
-    "@types/node": "~18",
+    "@types/node": "~18.16.19",
+    "@types/yargs": "^17.0.24",
     "@typescript-eslint/eslint-plugin": "~5.59",
     "@typescript-eslint/parser": "~5.59",
     "eslint": "~8.38",
@@ -20,23 +38,6 @@
     "ts-api-utils": "~0.0.44",
     "ts-jest": "~29.1",
     "typescript": "~5.0"
-  },
-  "scripts": {
-    "start": "node build/src/main.js",
-    "clean": "rimraf coverage build tmp",
-    "prebuild": "npm run lint",
-    "build": "tsc -p tsconfig.json",
-    "build:watch": "tsc -w -p tsconfig.json",
-    "build:release": "npm run clean && tsc -p tsconfig.release.json",
-    "lint": "eslint . --ext .ts --ext .mts",
-    "test": "jest --coverage",
-    "prettier": "prettier --config .prettierrc --write .",
-    "test:watch": "jest --watch"
-  },
-  "author": "Jakub Synowiec <jsynowiec@users.noreply.github.com>",
-  "license": "Apache-2.0",
-  "dependencies": {
-    "tslib": "~2.5"
   },
   "volta": {
     "node": "18.12.1"

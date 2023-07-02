@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "module": "node16",
-    "lib": ["ES2022"],
-    "moduleResolution": "node16",
+    "module": "commonjs",
+    "lib": [
+      "ES2022"
+    ],
+    "moduleResolution": "node",
     "rootDir": ".",
     "outDir": "build",
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "alwaysStrict": true,
@@ -17,7 +20,16 @@
     "noUnusedParameters": true,
     "noImplicitAny": false,
     "noImplicitThis": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "./src/types"
+    ]
   },
-  "include": ["src/**/*", "__tests__/**/*"]
+  "include": [
+    "src/**/*",
+    "__tests__/**/*"
+  ]
 }
