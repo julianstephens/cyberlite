@@ -2,10 +2,9 @@
   "compilerOptions": {
     "target": "es2022",
     "module": "commonjs",
-    "lib": [
-      "ES2022"
-    ],
+    "lib": ["ES2022", "DOM"],
     "moduleResolution": "node",
+    "baseUrl": ".",
     "rootDir": ".",
     "outDir": "build",
     "esModuleInterop": true,
@@ -21,15 +20,11 @@
     "noImplicitAny": false,
     "noImplicitThis": false,
     "strictNullChecks": false,
-    "types": [
-      "node"
-    ],
-    "typeRoots": [
-      "./src/types"
-    ]
+    "types": ["node"],
+    "typeRoots": ["./src/types"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": [
-    "src/**/*",
-    "__tests__/**/*"
-  ]
+  "include": ["src/**/*", "__tests__/**/*"]
 }
