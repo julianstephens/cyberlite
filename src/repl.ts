@@ -2,16 +2,12 @@ import {
   COMMAND_STATUS,
   COMPLETIONS,
   WELCOME_MSG,
+  parseSqlStatement,
   printUnknownInput,
 } from "@/utils";
 import chalk from "chalk";
 import readline from "node-color-readline";
-import {
-  createTable,
-  execute,
-  handleMetaCommand,
-  parseSqlStatement,
-} from "./executor";
+import { createTable, execute, handleMetaCommand } from "./executor";
 
 const table = createTable();
 const colorize = (line: string) => {

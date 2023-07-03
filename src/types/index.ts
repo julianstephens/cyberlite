@@ -13,8 +13,6 @@ type GrowToSize<T, N extends number, A extends T[]> = A["length"] extends N
 
 export type FixedArray<T, N extends number> = GrowToSize<T, N, []>;
 
-export type Primitive = string | number | boolean;
-
 export type CommandStatus = EnumExtract<typeof COMMAND_STATUS>;
 
 export type SqlStatementType = EnumExtract<typeof SQL_STATEMENT_TYPE>;
@@ -26,9 +24,9 @@ export type ExecuteStatus = EnumExtract<typeof EXECUTE_STATUS>;
 export type ExecuteErrorStatus = Omit<ExecuteStatus, "success" | "ready">;
 
 export type Row = {
-  id: FixedArray<string, 4>;
-  username: FixedArray<string, 32>;
-  email: FixedArray<string, 255>;
+  id: string;
+  username: string;
+  email: string;
 };
 
 export type Table = {

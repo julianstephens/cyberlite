@@ -12,7 +12,7 @@ import {
   COMMAND_STATUS,
   EXECUTE_STATUS,
   PAGE_SIZE,
-  ROW_SIZE,
+  MAX_ROW_SIZE,
   SQL_STATEMENT_TYPE,
   TABLE_MAX_PAGES,
   deserialize,
@@ -22,8 +22,7 @@ import {
   printRow,
   printUnknownInput,
   serialize,
-  sizeof,
-  toVarchar,
+  getExecutionTime,
 } from "./utils";
 
 export const handleMetaCommand = (command: string): CommandStatus => {
@@ -58,24 +57,19 @@ export const handleExecuteError = (error: ExecuteError) => {
   }
 };
 
-export const parseSqlStatement = (statement: string): SqlStatement => {
-  if (/^insert/i.test(statement)) {
-    return {
-      type: SQL_STATEMENT_TYPE.INSERT,
-      command: statement.slice(6),
-    };
-  } else if (/^select/i.test(statement)) {
-    return {
-      type: SQL_STATEMENT_TYPE.SELECT,
-      command: statement.slice(6),
-    };
-  }
-
-  printUnknownInput("keyword", statement);
-
-  return {
-    type: SQL_STATEMENT_TYPE.INVALID,
-  };
+const validateCharacterLength = (
+  text: string,
+  maxCharacters: number,
+  prop: string,
+): ExecuteError | null => {
+  return text.length > maxCharacters
+    ? {
+        status: EXECUTE_STATUS.INVALID_SYNTAX,
+        message: `'${chalk.red(prop)}' must not be longer than '${chalk.yellow(
+          maxCharacters,
+        )}' characters`,
+      }
+    : null;
 };
 
 const validateCommand = (command?: string): Row | ExecuteError | void => {
@@ -91,18 +85,17 @@ const validateCommand = (command?: string): Row | ExecuteError | void => {
     .filter((el) => el)
     .map((el) => el.trim());
 
-  const usernameVarchar = toVarchar(username, 32, "username");
-  if (isExecuteError(usernameVarchar))
-    return handleExecuteError(usernameVarchar);
-  const emailVarchar = toVarchar(email, 255, "email");
-  if (isExecuteError(emailVarchar)) return handleExecuteError(emailVarchar);
-  const idVarchar = toVarchar(id, 4, "id");
-  if (isExecuteError(idVarchar)) return handleExecuteError(idVarchar);
+  const idError = validateCharacterLength(id, 4, "id");
+  if (idError) return handleExecuteError(idError);
+  const usernameError = validateCharacterLength(username, 35, "username");
+  if (usernameError) return handleExecuteError(usernameError);
+  const emailError = validateCharacterLength(email, 255, "email");
+  if (emailError) return handleExecuteError(emailError);
 
   const rawArgs: Row = {
-    id: idVarchar,
-    username: usernameVarchar,
-    email: emailVarchar,
+    id,
+    username,
+    email,
   };
   Object.entries(rawArgs).forEach(([k, v]) => {
     if (!v) {
@@ -120,25 +113,25 @@ const validateCommand = (command?: string): Row | ExecuteError | void => {
   return rawArgs;
 };
 
-const getRowSlot = (table: Table, rowNum: number): [Buffer, number] => {
-  const rowsPerPage = ~~(PAGE_SIZE / ROW_SIZE);
-  const pageNum = ~~(rowNum / rowsPerPage);
+const getRowSlot = (table: Table, rowNum: number): [number, Buffer, number] => {
+  const pageNum = ~~(rowNum / table.rowsPerPage);
   let page = table.pages[pageNum];
-  const rowOffset = rowNum % rowsPerPage;
-  const byteOffset = rowOffset * ROW_SIZE;
-  if (!page) page = table.pages[pageNum] = Buffer.alloc(ROW_SIZE);
-  return [page, byteOffset];
+  const rowOffset = rowNum % table.rowsPerPage;
+  const byteOffset = rowOffset * MAX_ROW_SIZE;
+  if (!page) page = table.pages[pageNum] = Buffer.alloc(PAGE_SIZE);
+  return [pageNum, page, byteOffset];
 };
 
 const executeInsert = (
   statement: ExecuteStatement,
   table: Table,
 ): ExecuteStatus | ExecuteError => {
-  if (table.numRows >= ROW_SIZE * table.rowsPerPage) {
+  if (table.numRows >= MAX_ROW_SIZE * table.rowsPerPage) {
     return { status: EXECUTE_STATUS.TABLE_FULL };
   }
-
-  serialize(statement.row, ...getRowSlot(table, table.numRows));
+  const [pageNum, page, cursor] = getRowSlot(table, table.numRows);
+  serialize(statement.row, page, cursor);
+  table.pages[pageNum] = page;
   table.numRows++;
 
   return EXECUTE_STATUS.SUCCESS;
@@ -146,12 +139,14 @@ const executeInsert = (
 
 const executeSelect = (table: Table) => {
   for (let i = 0; i < table.numRows; i++) {
-    printRow(deserialize(getRowSlot(table, i)[0]));
+    const [_, page, cursor] = getRowSlot(table, i);
+    printRow(deserialize(page, cursor, i));
   }
   return EXECUTE_STATUS.SUCCESS;
 };
 
 export const execute = (statement: SqlStatement, table: Table) => {
+  const startTime = process.hrtime.bigint();
   let executionResult: ExecuteStatus | ExecuteError;
   switch (statement.type) {
     case SQL_STATEMENT_TYPE.INSERT:
@@ -172,16 +167,12 @@ export const execute = (statement: SqlStatement, table: Table) => {
       }
       break;
   }
-  console.log(chalk.green("\nExecuted"));
+  console.log(chalk.green(`\nExecuted (${getExecutionTime(startTime)}ms)`));
 };
 
 export const createTable = (): Table => {
   return {
-    rowsPerPage:
-      PAGE_SIZE /
-      (sizeof(Array.apply(",", { length: 32 })) +
-        sizeof(Array.apply(",", { length: 255 })) +
-        sizeof(Array.apply(",", { length: 4 }))),
+    rowsPerPage: ~~(PAGE_SIZE / MAX_ROW_SIZE),
     numRows: 0,
     pages: Array.apply(null, {
       length: TABLE_MAX_PAGES,

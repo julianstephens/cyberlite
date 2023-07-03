@@ -1,5 +1,6 @@
 import chalk from "chalk";
-import { CommandType, ExecuteError, Row } from "./types";
+import { CommandType, ExecuteError, Row, SqlStatement } from "./types";
+import convertHrtime from "convert-hrtime";
 
 export const assign = (dest: object, src: object) => {
   Object.keys(src).forEach((k) => (dest[k] = src[k]));
@@ -70,40 +71,44 @@ export const printRow = (result: string[]) => {
   console.log(`(${result.join(", ")})`);
 };
 
-export const sizeof = (val: string) => {
-  return Buffer.byteLength(Buffer.from(val));
-};
-
-export const toVarchar = (text: string, length: number, prop: string) => {
-  const varchar = Array.apply(null, { length }).map((_, idx) => text[idx]);
-  if (varchar.join("") !== text)
+export const parseSqlStatement = (statement: string): SqlStatement => {
+  if (/^insert/i.test(statement)) {
     return {
-      status: EXECUTE_STATUS.INVALID_SYNTAX,
-      message: `'${chalk.red(prop)}' must not be longer than '${chalk.yellow(
-        length,
-      )}' characters`,
+      type: SQL_STATEMENT_TYPE.INSERT,
+      command: statement.slice(6),
     };
-  return varchar;
+  } else if (/^select/i.test(statement)) {
+    return {
+      type: SQL_STATEMENT_TYPE.SELECT,
+      command: statement.slice(6),
+    };
+  }
+
+  printUnknownInput("keyword", statement);
+
+  return {
+    type: SQL_STATEMENT_TYPE.INVALID,
+  };
 };
 
-export const fromVarchar = (text: string) => text.replaceAll(",", "");
-
-export const serialize = (
-  source: Row,
-  destination: Buffer,
-  pageCursor: number,
-) => {
+export const serialize = (source: Row, destination: Buffer, cursor: number) => {
   const s = Buffer.from(Object.values(source).join(" "));
-  s.copy(destination, 0, pageCursor, Buffer.byteLength(s));
+  s.copy(destination, cursor);
+  console.log("source length", s.length);
 };
 
-export const deserialize = (source: Buffer) => {
-  return source
+export const deserialize = (source: Buffer, cursor: number, rowNum: number) => {
+  const row = source.subarray(cursor, cursor + MAX_ROW_SIZE);
+  return row
     .toString()
+    .trim()
     .split(" ")
-    .map((el) => fromVarchar(el));
+    .map((el) => el);
 };
+
+export const getExecutionTime = (time: BigInt) =>
+  convertHrtime(process.hrtime.bigint() - time).milliseconds.toFixed(2);
 
 export const PAGE_SIZE = 4096;
 export const TABLE_MAX_PAGES: number = 100;
-export const ROW_SIZE = 291;
+export const MAX_ROW_SIZE = 1167;
