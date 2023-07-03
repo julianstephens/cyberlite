@@ -23,7 +23,7 @@ dependencies:
 
 devDependencies:
   '@types/jest':
-    specifier: ~29.5
+    specifier: ~29.5.2
     version: 29.5.2
   '@types/node':
     specifier: ~18.16.19
@@ -49,6 +49,9 @@ devDependencies:
   jest:
     specifier: ~29.5
     version: 29.5.0(@types/node@18.16.19)
+  mock-stdin:
+    specifier: ^1.0.0
+    version: 1.0.0
   prettier:
     specifier: ~2.8
     version: 2.8.8
@@ -2939,6 +2942,10 @@ packages:
   /minipass@6.0.2:
     resolution: {integrity: sha512-MzWSV5nYVT7mVyWCwn2o7JH13w2TBRmmSqSRCKzTw+lmft9X4z+3wjvs06Tzijo5z4W/kahUCDpRXTF+ZrmF/w==}
     engines: {node: '>=16 || 14 >=14.17'}
+    dev: true
+
+  /mock-stdin@1.0.0:
+    resolution: {integrity: sha512-tukRdb9Beu27t6dN+XztSRHq9J0B/CoAOySGzHfn8UTfmqipA5yNT/sDUEyYdAV3Hpka6Wx6kOMxuObdOex60Q==}
     dev: true
 
   /ms@2.1.2:

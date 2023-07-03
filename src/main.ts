@@ -1,6 +1,6 @@
 import yargs from "yargs";
 import { startRepl } from "./repl";
-import { printHelp } from "./utils";
+import { printHelp, rl } from "./utils";
 
 const argv = yargs(process.argv.slice(2))
   .options({
@@ -13,4 +13,4 @@ if (argv.h) {
 }
 
 console.log("");
-startRepl();
+startRepl(rl);

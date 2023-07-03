@@ -20,12 +20,11 @@ import {
   printHelp,
   printMissing,
   printRow,
-  printUnknownInput,
   serialize,
   getExecutionTime,
 } from "./utils";
 
-export const handleMetaCommand = (command: string): CommandStatus => {
+export const executeMetaCommand = (command: string): CommandStatus => {
   if (/^\.help/.test(command)) {
     printHelp();
     return COMMAND_STATUS.SUCCESS;
@@ -33,10 +32,6 @@ export const handleMetaCommand = (command: string): CommandStatus => {
   if (/^\.clear/.test(command)) {
     console.clear();
     return COMMAND_STATUS.SUCCESS;
-  }
-  if (/^\.exit/.test(command)) {
-    console.log("Goodbye!");
-    process.exit();
   }
 
   return COMMAND_STATUS.UNKNOWN;
@@ -46,6 +41,9 @@ export const handleExecuteError = (error: ExecuteError) => {
   switch (error.status) {
     case EXECUTE_STATUS.TABLE_FULL:
       console.log(`${chalk.red("Error:")} Table full`);
+      break;
+    case EXECUTE_STATUS.MISSING_PROP:
+      printMissing(error.message);
       break;
     default:
       console.log(
@@ -85,12 +83,23 @@ const validateCommand = (command?: string): Row | ExecuteError | void => {
     .filter((el) => el)
     .map((el) => el.trim());
 
+  if (!id) return { status: EXECUTE_STATUS.MISSING_PROP, message: "id" };
+  if (!username)
+    return { status: EXECUTE_STATUS.MISSING_PROP, message: "username" };
+  if (!email) return { status: EXECUTE_STATUS.MISSING_PROP, message: "email" };
+
+  if (!Number.parseInt(id) || Number.parseInt(id) < 0)
+    return {
+      status: EXECUTE_STATUS.INVALID_SYNTAX,
+      message: `'${chalk.red("id")}' must be positive`,
+    };
+
   const idError = validateCharacterLength(id, 4, "id");
-  if (idError) return handleExecuteError(idError);
+  if (idError) return idError;
   const usernameError = validateCharacterLength(username, 35, "username");
-  if (usernameError) return handleExecuteError(usernameError);
+  if (usernameError) return usernameError;
   const emailError = validateCharacterLength(email, 255, "email");
-  if (emailError) return handleExecuteError(emailError);
+  if (emailError) return emailError;
 
   const rawArgs: Row = {
     id,
@@ -113,41 +122,47 @@ const validateCommand = (command?: string): Row | ExecuteError | void => {
   return rawArgs;
 };
 
-const getRowSlot = (table: Table, rowNum: number): [number, Buffer, number] => {
+const getRowSlot = (
+  table: Table,
+  rowNum: number,
+): [number, Buffer, number, Table] => {
   const pageNum = ~~(rowNum / table.rowsPerPage);
   let page = table.pages[pageNum];
   const rowOffset = rowNum % table.rowsPerPage;
   const byteOffset = rowOffset * MAX_ROW_SIZE;
   if (!page) page = table.pages[pageNum] = Buffer.alloc(PAGE_SIZE);
-  return [pageNum, page, byteOffset];
+  return [pageNum, page, byteOffset, table];
 };
 
 const executeInsert = (
   statement: ExecuteStatement,
   table: Table,
-): ExecuteStatus | ExecuteError => {
-  if (table.numRows >= MAX_ROW_SIZE * table.rowsPerPage) {
+): [ExecuteStatus, Table] | ExecuteError => {
+  if (table.numRows >= 4) {
     return { status: EXECUTE_STATUS.TABLE_FULL };
   }
-  const [pageNum, page, cursor] = getRowSlot(table, table.numRows);
+
+  const [pageNum, page, cursor, t] = getRowSlot(table, table.numRows);
+  table = t;
   serialize(statement.row, page, cursor);
   table.pages[pageNum] = page;
   table.numRows++;
 
-  return EXECUTE_STATUS.SUCCESS;
+  return [EXECUTE_STATUS.SUCCESS, table];
 };
 
 const executeSelect = (table: Table) => {
   for (let i = 0; i < table.numRows; i++) {
     const [_, page, cursor] = getRowSlot(table, i);
-    printRow(deserialize(page, cursor, i));
+    printRow(deserialize(page, cursor));
   }
   return EXECUTE_STATUS.SUCCESS;
 };
 
 export const execute = (statement: SqlStatement, table: Table) => {
   const startTime = process.hrtime.bigint();
-  let executionResult: ExecuteStatus | ExecuteError;
+  let executionResult: ExecuteStatus | [ExecuteStatus, Table] | ExecuteError;
+
   switch (statement.type) {
     case SQL_STATEMENT_TYPE.INSERT:
       const res = validateCommand(statement.command);
@@ -157,22 +172,24 @@ export const execute = (statement: SqlStatement, table: Table) => {
         { ...statement, row: res } as ExecuteStatement,
         table,
       );
+      if (!isExecuteError(executionResult)) table = executionResult[1];
       break;
     case SQL_STATEMENT_TYPE.SELECT:
       executionResult = executeSelect(table);
       break;
-    default:
-      if (isExecuteError(executionResult)) {
-        return handleExecuteError(executionResult as ExecuteError);
-      }
-      break;
+  }
+  if (isExecuteError(executionResult)) {
+    return handleExecuteError(executionResult as ExecuteError);
   }
   console.log(chalk.green(`\nExecuted (${getExecutionTime(startTime)}ms)`));
+  return table;
 };
 
 export const createTable = (): Table => {
+  const rowsPerPage = ~~(PAGE_SIZE / MAX_ROW_SIZE);
   return {
-    rowsPerPage: ~~(PAGE_SIZE / MAX_ROW_SIZE),
+    rowsPerPage,
+    maxRows: rowsPerPage * TABLE_MAX_PAGES,
     numRows: 0,
     pages: Array.apply(null, {
       length: TABLE_MAX_PAGES,

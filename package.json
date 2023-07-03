@@ -2,6 +2,7 @@
   "name": "sqlite-clone",
   "version": "1.0.0",
   "type": "module",
+  "main": "./build/main.cjs",
   "engines": {
     "node": ">= 18.12 <19"
   },
@@ -11,11 +12,10 @@
     "prebuild": "pnpm lint",
     "build": "tsup",
     "build:watch": "tsup --watch",
-    "build:release": "pnpm clean && tsc -p tsconfig.release.json",
     "lint": "eslint . --ext .ts --ext .mts",
-    "test": "jest --coverage",
+    "test": "jest --coverage --silent",
     "prettier": "prettier --config .prettierrc --write .",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch --silent"
   },
   "dependencies": {
     "chalk": "^5.3.0",
@@ -25,7 +25,7 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@types/jest": "~29.5",
+    "@types/jest": "~29.5.2",
     "@types/node": "~18.16.19",
     "@types/yargs": "^17.0.24",
     "@typescript-eslint/eslint-plugin": "~5.59",
@@ -34,6 +34,7 @@
     "eslint-config-prettier": "~8.8",
     "eslint-plugin-jest": "~27.2",
     "jest": "~29.5",
+    "mock-stdin": "^1.0.0",
     "prettier": "~2.8",
     "rimraf": "~5.0",
     "ts-api-utils": "~0.0.44",

@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { CommandType, ExecuteError, Row, SqlStatement } from "./types";
 import convertHrtime from "convert-hrtime";
+import readline from "node-color-readline";
 
 export const assign = (dest: object, src: object) => {
   Object.keys(src).forEach((k) => (dest[k] = src[k]));
@@ -25,6 +26,7 @@ export const COMMAND_TYPE = {
 export const EXECUTE_STATUS = {
   TABLE_FULL: "table full",
   INVALID_SYNTAX: "invalid syntax",
+  MISSING_PROP: "missing property",
   READY: "ready",
   SUCCESS: "success",
 } as const;
@@ -71,6 +73,49 @@ export const printRow = (result: string[]) => {
   console.log(`(${result.join(", ")})`);
 };
 
+const colorize = (line: string) => {
+  let colorized = "";
+  let regex: [RegExp, string][] = [
+    [/\/\/.*$/m, "grey"], // comment
+    [/(['"`\/]).*?(?!<\\)\1/, "cyan"], // string/regex, not rock solid
+    [/[+-]?(\d+\.?\d*|\d*\.\d+)([eE][+-]?\d+)?/, "cyan"], // number
+    [/\b(true|false|null|undefined|NaN|Infinity)\b/, "blue"],
+    [/\b(insert|select)\b/, "magenta"],
+  ];
+
+  while (line !== "") {
+    let start = +Infinity;
+    let color = "";
+    let length = 0;
+    regex.forEach((reg) => {
+      const match = reg[0].exec(line);
+      if (match && match.index < start) {
+        start = match.index;
+        color = reg[1];
+        length = match[0].length;
+      }
+    });
+    colorized += line.slice(0, start);
+    if (color) colorized += chalk[color](line.slice(start, start + length));
+    line = line.slice(start + length);
+  }
+  return colorized;
+};
+
+export const createReadLine = () => {
+  return readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    colorize,
+    completer: (line: string) => {
+      const hits = COMPLETIONS.filter((c) => c.startsWith(line));
+      return [hits.length ? hits : COMPLETIONS, line];
+    },
+  });
+};
+
+export let rl = createReadLine();
+
 export const parseSqlStatement = (statement: string): SqlStatement => {
   if (/^insert/i.test(statement)) {
     return {
@@ -85,7 +130,7 @@ export const parseSqlStatement = (statement: string): SqlStatement => {
   }
 
   printUnknownInput("keyword", statement);
-
+  console.log("here2");
   return {
     type: SQL_STATEMENT_TYPE.INVALID,
   };
@@ -94,21 +139,21 @@ export const parseSqlStatement = (statement: string): SqlStatement => {
 export const serialize = (source: Row, destination: Buffer, cursor: number) => {
   const s = Buffer.from(Object.values(source).join(" "));
   s.copy(destination, cursor);
-  console.log("source length", s.length);
 };
 
-export const deserialize = (source: Buffer, cursor: number, rowNum: number) => {
+export const deserialize = (source: Buffer, cursor: number) => {
   const row = source.subarray(cursor, cursor + MAX_ROW_SIZE);
   return row
     .toString()
     .trim()
+    .replace(/\x00/g, "")
     .split(" ")
     .map((el) => el);
 };
 
-export const getExecutionTime = (time: BigInt) =>
+export const getExecutionTime = (time: bigint) =>
   convertHrtime(process.hrtime.bigint() - time).milliseconds.toFixed(2);
 
 export const PAGE_SIZE = 4096;
 export const TABLE_MAX_PAGES: number = 100;
-export const MAX_ROW_SIZE = 1167;
+export const MAX_ROW_SIZE = 1165;

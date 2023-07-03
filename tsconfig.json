@@ -8,6 +8,7 @@
     "rootDir": ".",
     "outDir": "build",
     "esModuleInterop": true,
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "alwaysStrict": true,
@@ -20,8 +21,8 @@
     "noImplicitAny": false,
     "noImplicitThis": false,
     "strictNullChecks": false,
-    "types": ["node"],
-    "typeRoots": ["./src/types"],
+    "types": ["node", "jest"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "paths": {
       "@/*": ["./src/*"]
     }

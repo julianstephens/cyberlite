@@ -4,6 +4,7 @@ import {
   EXECUTE_STATUS,
   SQL_STATEMENT_TYPE,
 } from "@/utils";
+import readline from "node-color-readline";
 
 type EnumExtract<T> = T[keyof T];
 
@@ -31,6 +32,7 @@ export type Row = {
 
 export type Table = {
   rowsPerPage: number;
+  maxRows: number;
   numRows: number;
   pages: FixedArray<Buffer | null, 100>;
 };
@@ -47,3 +49,5 @@ export type ExecuteError = {
   status: ExecuteErrorStatus;
   message?: string;
 };
+
+export type Readline = typeof readline;

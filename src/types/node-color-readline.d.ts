@@ -12,6 +12,10 @@ declare module "readline" {
   };
 
   function createInterface(args: InterfaceArgs): any;
+
+  type cb = (command: string) => void;
+
+  function question(prompt: string, cb: cb): void;
 }
 
 declare module "node-color-readline" {
