@@ -1,1 +1,3 @@
-# sqlite-clone
+# cyberlite
+
+Typescript sqlite clone
