@@ -35,7 +35,7 @@ export default class CyberliteRepl {
       if (/^\./.test(`${command}`)) {
         const res = this.vm.executeMetaCommand(command);
         if (res !== propertyOf(CB.Result.Execution, (x) => x.OK)) {
-          logger.error(res as keyof CB.CyberliteError);
+          logger.error(res as CB.CyberliteErrorStatus);
         }
       } else {
         try {

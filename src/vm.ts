@@ -76,7 +76,7 @@ export default class VM {
     }
 
     if (executionResult !== propertyOf(CB.Result.Execution, (x) => x.OK)) {
-      logger.error(executionResult as keyof CB.CyberliteError);
+      logger.error(executionResult as CB.CyberliteErrorStatus);
       return undefined;
     }
 

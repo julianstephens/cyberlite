@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { Cyberlite } from "./types/cyberlite";
+import { Cyberlite as CB } from "./types/cyberlite";
 
 export const SQL_STATEMENT_TYPE = {
   INSERT: "insert",
@@ -28,10 +28,7 @@ type in a command to begin
 type ${chalk.magenta(".help")} for a list of repl commands
 ` as const;
 
-export const throwError = (
-  err: keyof Cyberlite.CyberliteError,
-  message: string,
-) => {
+export const throwError = (err: CB.CyberliteErrorStatus, message: string) => {
   function error(message = "") {
     this.name = err;
     this.message = message;

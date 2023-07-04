@@ -85,7 +85,7 @@ export default class Pager {
       const page = Buffer.alloc(Cyberlite.PAGE_SIZE);
       let numPages = ~~(this.fileLength / Cyberlite.PAGE_SIZE);
 
-      if (this.fileLength % Cyberlite.PAGE_SIZE) numPages += 1;
+      if (this.fileLength % Cyberlite.PAGE_SIZE) numPages++;
 
       if (pageNum <= numPages) {
         read(

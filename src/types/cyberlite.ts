@@ -1,4 +1,5 @@
 import { EnumExtract } from ".";
+import Cyberlite from "../cyberlite";
 
 export namespace Cyberlite {
   export namespace Error {
@@ -42,7 +43,9 @@ export namespace Cyberlite {
 
   export type CyberliteError = typeof CyberliteError;
 
+  export type CyberliteErrorStatus = keyof typeof CyberliteError;
+
   export type CyberliteStatus =
-    | keyof typeof Cyberlite.CyberliteError
-    | keyof typeof Cyberlite.Result.Execution;
+    | CyberliteErrorStatus
+    | keyof typeof Result.Execution;
 }
