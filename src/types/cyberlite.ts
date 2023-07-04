@@ -1,4 +1,5 @@
 import { EnumExtract } from ".";
+import Cyberlite from "../cyberlite";
 
 export namespace Cyberlite {
   export namespace Error {
