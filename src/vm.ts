@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import convertHrtime from "convert-hrtime";
 import { exit } from "process";
-import Cyberlite from "./cyberlite";
+import Database from "./cyberlite";
 import logger from "./logger";
 import Parser from "./parser";
 import Table from "./table";
@@ -49,7 +49,7 @@ export default class VM {
 
   /**
    * Performs command on targeted table
-   * @param statement formatted user inpu
+   * @param statement formatted user input
    * @param table table to execute on
    * @returns modified table
    */
@@ -94,7 +94,7 @@ export default class VM {
   executeMetaCommand = (command: string): CB.CyberliteStatus => {
     if (/^\.exit/.test(`${command}`)) {
       logger.log("Goodbye!");
-      Cyberlite.close(this.table).catch((err) => {
+      Database.close(this.table).catch((err) => {
         logger.error(
           propertyOf(CB.CyberliteError, (x) => x.CYBERLITE_INTERNAL),
           {

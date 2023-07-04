@@ -1,5 +1,5 @@
 import readline from "node-color-readline";
-import Cyberlite from "./cyberlite";
+import Database from "./cyberlite";
 import logger from "./logger";
 import Parser from "./parser";
 import { Readline } from "./types";
@@ -10,11 +10,11 @@ import VM from "./vm";
 /** Interactive REPL for Cyberlite */
 export default class CyberliteRepl {
   readonly rl: Readline;
-  readonly db: Cyberlite;
+  readonly db: Database;
   readonly #prompt = "\n> ";
   readonly vm: VM;
 
-  constructor(filename: string) {
+  constructor(filename = "./db") {
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -24,7 +24,7 @@ export default class CyberliteRepl {
         return [hits.length ? hits : COMPLETIONS, line];
       },
     });
-    this.db = new Cyberlite();
+    this.db = new Database();
     this.db.open(filename);
     this.vm = new VM();
   }

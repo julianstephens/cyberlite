@@ -1,20 +1,20 @@
 import { close } from "fs";
 import { exit } from "process";
+import env from "./env";
 import logger from "./logger";
 import Table from "./table";
 import { Cyberlite as CB } from "./types/cyberlite";
 import { propertyOf } from "./utils";
 
 /**
- * Cyberlite database
+ * Handles the database file
  */
-export default class Cyberlite {
+export default class Database {
   tables: Table[] = [];
 
-  // TODO: move hard-coded values to env
   // default: NTFS block size
-  static readonly PAGE_SIZE: number = 4096;
-  static readonly TABLE_MAX_PAGES: number = 100;
+  static readonly PAGE_SIZE: number = env.PAGE_SIZE;
+  static readonly TABLE_MAX_PAGES: number = env.MAX_TABLE_ROWS;
   // TODO: hardcoded until dynamic tables implemented
   static readonly MAX_ROW_SIZE: number = 1165;
 

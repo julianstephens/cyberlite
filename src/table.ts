@@ -1,4 +1,4 @@
-import Cyberlite from "./cyberlite";
+import Database from "./cyberlite";
 import Pager from "./pager";
 
 /** Represents a single db table */
@@ -9,9 +9,9 @@ export default class Table {
   pager: Pager;
 
   constructor(filename: string) {
-    this.rowsPerPage = ~~(Cyberlite.PAGE_SIZE / Cyberlite.MAX_ROW_SIZE);
-    this.maxRows = this.rowsPerPage * Cyberlite.TABLE_MAX_PAGES;
-    this.numRows = ~~(this.pager.fileLength / Cyberlite.MAX_ROW_SIZE);
+    this.rowsPerPage = ~~(Database.PAGE_SIZE / Database.MAX_ROW_SIZE);
+    this.maxRows = this.rowsPerPage * Database.TABLE_MAX_PAGES;
+    this.numRows = ~~(this.pager.fileLength / Database.MAX_ROW_SIZE);
     this.pager = new Pager(filename);
   }
 
@@ -23,10 +23,10 @@ export default class Table {
   getRowSlot = (rowNum: number): [number, Buffer, number] => {
     const pageNum = ~~(rowNum / this.rowsPerPage);
     const rowOffset = rowNum % this.rowsPerPage;
-    const byteOffset = rowOffset * Cyberlite.MAX_ROW_SIZE;
+    const byteOffset = rowOffset * Database.MAX_ROW_SIZE;
 
     let page = this.pager.getPage(pageNum);
-    if (!page) page = this.pager[pageNum] = Buffer.alloc(Cyberlite.PAGE_SIZE);
+    if (!page) page = this.pager[pageNum] = Buffer.alloc(Database.PAGE_SIZE);
 
     return [pageNum, page, byteOffset];
   };

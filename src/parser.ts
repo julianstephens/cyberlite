@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import Cyberlite from "./cyberlite";
+import Database from "./cyberlite";
 import logger from "./logger";
 import { Row, SqlStatement } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
@@ -112,7 +112,7 @@ export default class Parser {
    * @returns table row as tuple
    */
   deserialize = (source: Buffer, cursor: number) => {
-    const row = source.subarray(cursor, cursor + Cyberlite.MAX_ROW_SIZE);
+    const row = source.subarray(cursor, cursor + Database.MAX_ROW_SIZE);
     return row
       .toString()
       .trim()

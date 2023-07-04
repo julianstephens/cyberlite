@@ -9,7 +9,7 @@ import {
 } from "fs";
 import { open } from "fs/promises";
 import { exit } from "process";
-import Cyberlite from "./cyberlite";
+import Database from "./cyberlite";
 import logger from "./logger";
 import { FixedArray } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
@@ -36,7 +36,7 @@ export default class Pager {
         this.rs = createReadStream("", { fd });
         this.ws = createWriteStream("", { fd });
         this.pages = Array.apply(null, {
-          length: Cyberlite.TABLE_MAX_PAGES,
+          length: Database.TABLE_MAX_PAGES,
         });
       })
       .catch(() => {
@@ -75,25 +75,25 @@ export default class Pager {
    * @returns requested buffer
    */
   getPage = (pageNum: number) => {
-    if (pageNum > Cyberlite.TABLE_MAX_PAGES) {
+    if (pageNum > Database.TABLE_MAX_PAGES) {
       logger.error(propertyOf(CB.CyberliteError, (x) => x.TABLE_FULL));
       process.exit(1);
     }
 
     // page not cached. create and load from db file
     if (!this.pages[pageNum]) {
-      const page = Buffer.alloc(Cyberlite.PAGE_SIZE);
-      let numPages = ~~(this.fileLength / Cyberlite.PAGE_SIZE);
+      const page = Buffer.alloc(Database.PAGE_SIZE);
+      let numPages = ~~(this.fileLength / Database.PAGE_SIZE);
 
-      if (this.fileLength % Cyberlite.PAGE_SIZE) numPages++;
+      if (this.fileLength % Database.PAGE_SIZE) numPages++;
 
       if (pageNum <= numPages) {
         read(
           this.fileDescriptor,
           page,
           0,
-          Cyberlite.PAGE_SIZE,
-          pageNum * Cyberlite.PAGE_SIZE,
+          Database.PAGE_SIZE,
+          pageNum * Database.PAGE_SIZE,
           (err) => {
             if (err) {
               logger.error(propertyOf(CB.Error.System, (x) => x.IOERR_READ));
@@ -123,8 +123,8 @@ export default class Pager {
       this.fileDescriptor,
       this.pages[pageNum],
       0,
-      Cyberlite.PAGE_SIZE,
-      pageNum * Cyberlite.PAGE_SIZE,
+      Database.PAGE_SIZE,
+      pageNum * Database.PAGE_SIZE,
       (err) => {
         if (err) {
           logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_WRITE));
