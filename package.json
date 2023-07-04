@@ -1,6 +1,7 @@
 {
-  "name": "sqlite-clone",
-  "version": "1.0.0",
+  "name": "cyberlite",
+  "description": "A Typescript sqlite clone",
+  "version": "0.1.0",
   "type": "module",
   "main": "./build/main.cjs",
   "engines": {
