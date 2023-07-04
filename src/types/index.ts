@@ -1,12 +1,8 @@
-import {
-  COMMAND_STATUS,
-  COMMAND_TYPE,
-  EXECUTE_STATUS,
-  SQL_STATEMENT_TYPE,
-} from "@/utils";
+import { SQL_STATEMENT_TYPE } from "@/utils";
+import { ReadStream, WriteStream } from "fs";
 import readline from "node-color-readline";
 
-type EnumExtract<T> = T[keyof T];
+export type EnumExtract<T> = T[keyof T];
 
 type GrowToSize<T, N extends number, A extends T[]> = A["length"] extends N
   ? A
@@ -14,15 +10,7 @@ type GrowToSize<T, N extends number, A extends T[]> = A["length"] extends N
 
 export type FixedArray<T, N extends number> = GrowToSize<T, N, []>;
 
-export type CommandStatus = EnumExtract<typeof COMMAND_STATUS>;
-
 export type SqlStatementType = EnumExtract<typeof SQL_STATEMENT_TYPE>;
-
-export type CommandType = EnumExtract<typeof COMMAND_TYPE>;
-
-export type ExecuteStatus = EnumExtract<typeof EXECUTE_STATUS>;
-
-export type ExecuteErrorStatus = Omit<ExecuteStatus, "success" | "ready">;
 
 export type Row = {
   id: string;
@@ -30,11 +18,19 @@ export type Row = {
   email: string;
 };
 
+export type Pager = {
+  fileDescriptor: number;
+  fileLength: number;
+  rs: ReadStream;
+  ws: WriteStream;
+  pages: FixedArray<Buffer | null, 100>;
+};
+
 export type Table = {
   rowsPerPage: number;
   maxRows: number;
   numRows: number;
-  pages: FixedArray<Buffer | null, 100>;
+  pager: Pager;
 };
 
 export type SqlStatement = {
@@ -45,9 +41,10 @@ export type SqlStatement = {
 
 export type ExecuteStatement = Required<SqlStatement>;
 
-export type ExecuteError = {
-  status: ExecuteErrorStatus;
-  message?: string;
-};
-
 export type Readline = typeof readline;
+
+export type ErrorOptions = {
+  message?: string;
+  prop?: string;
+  propType?: string;
+};

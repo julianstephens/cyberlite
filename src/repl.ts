@@ -1,50 +1,55 @@
-import {
-  COMMAND_STATUS,
-  WELCOME_MSG,
-  parseSqlStatement,
-  printUnknownInput,
-} from "@/utils";
-import { createTable, execute, executeMetaCommand } from "./executor";
-import { Readline, Table } from "./types";
+import readline from "node-color-readline";
+import Cyberlite from "./cyberlite";
+import logger from "./logger";
+import Parser from "./parser";
+import { Readline } from "./types";
+import { Cyberlite as CB } from "./types/cyberlite";
+import { colorize, COMPLETIONS } from "./utils";
+import VM from "./vm";
 
-const defaultPrompt = "\n> ";
+export default class CyberliteRepl {
+  rl: Readline;
+  db: Cyberlite;
+  prompt = "\n> ";
+  vm: VM;
 
-export const handleMetaCommand = (
-  rl: Readline,
-  command: string,
-  table: Table,
-) => {
-  if (/^\.exit/.test(`${command}`)) {
-    console.log("Goodbye!");
-    process.exit();
-  } else {
-    switch (executeMetaCommand(`${command}`)) {
-      case COMMAND_STATUS.SUCCESS:
-        repl(defaultPrompt, rl, table);
-        break;
-      case COMMAND_STATUS.UNKNOWN:
-        console.log("here");
-        printUnknownInput("command", `${command}`);
-        repl(defaultPrompt, rl, table);
-        break;
-    }
+  constructor(filename: string) {
+    this.rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      colorize,
+      completer: (line: string) => {
+        const hits = COMPLETIONS.filter((c) => c.startsWith(line));
+        return [hits.length ? hits : COMPLETIONS, line];
+      },
+    });
+    this.db = new Cyberlite();
+    this.db.open(filename);
+    this.vm = new VM();
   }
-};
 
-export const repl = (prompt: string, rl: Readline, table: Table) => {
-  rl.question(prompt, (command: string) => {
-    if (/^\./.test(`${command}`)) {
-      handleMetaCommand(rl, command, table);
-    } else {
-      const res = execute(parseSqlStatement(`${command}`), table);
-      if (res) table = res
-      repl(defaultPrompt, rl, table);
-    }
-  });
-};
+  run = () => {
+    this.rl.question(this.prompt, (command: string) => {
+      if (/^\./.test(`${command}`)) {
+        const res = this.vm.executeMetaCommand(command);
+        if (res !== CB.CyberliteStatus) {
+          logger.error(res);
+        }
+      } else {
+        try {
+          const statement = Parser.parseSqlStatement(`${command}`);
+          const res = this.vm.execute(statement, this.db.tables[0]);
+          if (res) this.db.tables[0] = res;
+        } catch (err) {
+          logger.error(err.name, err.message);
+        }
+      }
+      this.run();
+    });
+  };
 
-export const startRepl = (rl: Readline) => {
-  console.log(WELCOME_MSG);
-  const table = createTable();
-  repl(defaultPrompt, rl, table);
-};
+  start = () => {
+    logger.welcome();
+    this.run();
+  };
+}

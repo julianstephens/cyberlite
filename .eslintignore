@@ -1,1 +1,5 @@
 /**/*.js
+build
+__tests__
+tsup.config.ts
+types

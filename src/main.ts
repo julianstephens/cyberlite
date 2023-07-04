@@ -1,16 +1,17 @@
 import yargs from "yargs";
-import { startRepl } from "./repl";
-import { printHelp, rl } from "./utils";
+import logger from "./logger";
+import CyberliteRepl from "./repl";
 
 const argv = yargs(process.argv.slice(2))
   .options({
     h: { type: "boolean", default: false, alias: "help" },
+    f: { type: "string", default: "./db", alias: "file" },
   })
   .parseSync();
 
 if (argv.h) {
-  printHelp();
+  logger.help();
 }
 
-console.log("");
-startRepl(rl);
+const repl = new CyberliteRepl(argv.f);
+repl.start();

@@ -3,7 +3,7 @@ import { repl } from "@/repl";
 import { HELP_MSG, createReadLine, rl } from "@/utils";
 import { log } from "console";
 import { Table } from "@/types";
-import { createTable } from "@/executor";
+import { connect } from "@/executor";
 import chalk from "chalk";
 
 describe("database", () => {
@@ -13,7 +13,7 @@ describe("database", () => {
   let table: Table;
 
   beforeEach(() => {
-    table = createTable();
+    table = connect();
     mockStdin = stdin.stdin();
     mockConsole = jest.spyOn(console, "log");
     mockExit = jest
