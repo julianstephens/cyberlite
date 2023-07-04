@@ -11,6 +11,7 @@ import { propertyOf } from "./utils";
 export default class Cyberlite {
   tables: Table[] = [];
 
+  // TODO: move hard-coded values to env
   // default: NTFS block size
   static readonly PAGE_SIZE: number = 4096;
   static readonly TABLE_MAX_PAGES: number = 100;

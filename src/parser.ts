@@ -54,39 +54,26 @@ export default class Parser {
    * @returns formatted row for insertion
    */
   parseCommand = (command?: string): Row => {
+    const missingStatus = propertyOf(CB.CyberliteError, (x) => x.MISSING_PROP);
+    const invalidStatus = propertyOf(
+      CB.CyberliteError,
+      (x) => x.INVALID_SYNTAX,
+    );
     let foundMissing = false;
     if (!command)
-      throwError(
-        propertyOf(CB.CyberliteError, (x) => x.INVALID_SYNTAX),
-        "Empty 'insert' statement provided",
-      );
+      throwError(invalidStatus, "Empty 'insert' statement provided");
     const [id, username, email] = command
       .trim()
       .split(" ")
       .filter((el) => el)
       .map((el) => el.trim());
 
-    if (!id)
-      throwError(
-        propertyOf(CB.CyberliteError, (x) => x.MISSING_PROP),
-        "id",
-      );
-    if (!username)
-      throwError(
-        propertyOf(CB.CyberliteError, (x) => x.MISSING_PROP),
-        "username",
-      );
-    if (!email)
-      throwError(
-        propertyOf(CB.CyberliteError, (x) => x.MISSING_PROP),
-        "email",
-      );
+    if (!id) throwError(missingStatus, "id");
+    if (!username) throwError(missingStatus, "username");
+    if (!email) throwError(missingStatus, "email");
 
     if (!Number.parseInt(id) || Number.parseInt(id) < 0)
-      throwError(
-        propertyOf(CB.CyberliteError, (x) => x.INVALID_SYNTAX),
-        `'${chalk.red("id")}' must be positive`,
-      );
+      throwError(invalidStatus, `'${chalk.red("id")}' must be positive`);
 
     this.validateCharacterLength(id, 4, "id");
     this.validateCharacterLength(username, 35, "username");
@@ -99,10 +86,7 @@ export default class Parser {
     };
     Object.entries(rawArgs).forEach(([k, v]) => {
       if (!v) {
-        logger.error(
-          propertyOf(CB.CyberliteError, (x) => x.MISSING_PROP),
-          { prop: k },
-        );
+        logger.error(missingStatus, { prop: k });
         if (!foundMissing) foundMissing = true;
       }
     });

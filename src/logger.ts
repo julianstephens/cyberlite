@@ -27,7 +27,7 @@ class Logger {
   };
 
   /**
-   * Logs statement
+   * Prints statement
    * @param message text to log or string array of row items
    */
   log = (message: string | string[]) => {
@@ -40,11 +40,11 @@ class Logger {
   };
 
   /**
-   * Logs error statement
+   * Prints error statement
    * @param error status message
    * @param options target specific property
    */
-  error = (error: keyof CB.CyberliteError, options?: ErrorOptions) => {
+  error = (error: CB.CyberliteErrorStatus, options?: ErrorOptions) => {
     switch (error) {
       case "MISSING_PROP":
         this.#errorProp("Missing", "param", options.prop);
