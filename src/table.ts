@@ -1,9 +1,10 @@
 import Cyberlite from "./cyberlite";
 import Pager from "./pager";
 
+/** Represents a single db table */
 export default class Table {
-  rowsPerPage: number;
-  maxRows: number;
+  readonly rowsPerPage: number;
+  readonly maxRows: number;
   numRows: number;
   pager: Pager;
 
@@ -14,6 +15,11 @@ export default class Table {
     this.pager = new Pager(filename);
   }
 
+  /**
+   * Retrieves the page and location for a row
+   * @param rowNum row to get location of
+   * @returns [page number, page, row start position on page]
+   */
   getRowSlot = (rowNum: number): [number, Buffer, number] => {
     const pageNum = ~~(rowNum / this.rowsPerPage);
     const rowOffset = rowNum % this.rowsPerPage;

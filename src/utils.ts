@@ -15,19 +15,6 @@ export const COMPLETIONS = [
   ".exit",
 ] as const;
 
-export const throwError = (
-  err: Cyberlite.Error.CyberliteError,
-  message: string,
-) => {
-  function error(message = "") {
-    this.name = err.split(":")[0];
-    this.message = message;
-  }
-  error.prototype = new Error();
-
-  throw { name: err, message };
-};
-
 export const HELP_MSG = `
 ${chalk.blue("cyberlite repl commands")}
 ${chalk.yellow(".clear")}        clear all the code
@@ -40,6 +27,19 @@ ${chalk.blue("cyberlite")}: Typescript sqlite clone
 type in a command to begin
 type ${chalk.magenta(".help")} for a list of repl commands
 ` as const;
+
+export const throwError = (
+  err: keyof Cyberlite.CyberliteError,
+  message: string,
+) => {
+  function error(message = "") {
+    this.name = err;
+    this.message = message;
+  }
+  error.prototype = new Error();
+
+  throw { name: err, message };
+};
 
 export const colorize = (line: string) => {
   let colorized = "";
@@ -68,4 +68,14 @@ export const colorize = (line: string) => {
     line = line.slice(start + length);
   }
   return colorized;
+};
+
+/** Returns string representation of object key */
+export const propertyOf = <T extends object>(
+  o: T,
+  expression: (x: { [Property in keyof T]: string }) => string,
+): keyof T => {
+  const res = {} as { [Property in keyof T]: string };
+  Object.keys(o).map((k) => (res[k as keyof T] = k));
+  return expression(res) as keyof T;
 };

@@ -9,7 +9,8 @@ export namespace Cyberlite {
       IOERR_READ: "IO Error: 'read' operation failed",
       IOERR_WRITE: "IO Error: 'write' operation failed",
       OUT_OF_BOUNDS: "System Error: page number out of bounds",
-    };
+    } as const;
+    export type SystemError = EnumExtract<typeof System>;
 
     export const Execution = {
       TABLE_FULL:
@@ -17,13 +18,10 @@ export namespace Cyberlite {
       INVALID_SYNTAX: "Syntax Error: invalid syntax",
       MISSING_PROP: "Syntax Error: missing property",
       UNKNOWN_COMMAND: "Sytax Error: unknown command",
-    };
-
-    export type SystemError = EnumExtract<typeof System>;
+    } as const;
     export type ExecutionError = EnumExtract<typeof Execution>;
-    export type PropError = "Unrecognized" | "Missing";
 
-    export type CyberliteError = SystemError & ExecutionError;
+    export type PropError = "Unrecognized" | "Missing";
   }
 
   export namespace Result {
@@ -32,12 +30,19 @@ export namespace Cyberlite {
       INSERTED: "'insert' operation successful",
       UPDATED: "'update' operation successful",
       DELETED: "'delete' operation successful",
-    };
+    } as const;
 
     export type ExecutionStatus = EnumExtract<typeof Execution>;
   }
 
+  export const CyberliteError = {
+    ...Error.System,
+    ...Error.Execution,
+  } as const;
+
+  export type CyberliteError = typeof CyberliteError;
+
   export type CyberliteStatus =
-    | Cyberlite.Error.CyberliteError
-    | Cyberlite.Result.ExecutionStatus;
+    | keyof typeof Cyberlite.CyberliteError
+    | keyof typeof Cyberlite.Result.Execution;
 }

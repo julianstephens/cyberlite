@@ -4,14 +4,15 @@ import logger from "./logger";
 import Parser from "./parser";
 import { Readline } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
-import { colorize, COMPLETIONS } from "./utils";
+import { colorize, COMPLETIONS, propertyOf } from "./utils";
 import VM from "./vm";
 
+/** Interactive REPL for Cyberlite */
 export default class CyberliteRepl {
-  rl: Readline;
-  db: Cyberlite;
-  prompt = "\n> ";
-  vm: VM;
+  readonly rl: Readline;
+  readonly db: Cyberlite;
+  readonly #prompt = "\n> ";
+  readonly vm: VM;
 
   constructor(filename: string) {
     this.rl = readline.createInterface({
@@ -28,12 +29,13 @@ export default class CyberliteRepl {
     this.vm = new VM();
   }
 
+  /** Loops REPL session until terminated by user */
   run = () => {
-    this.rl.question(this.prompt, (command: string) => {
+    this.rl.question(this.#prompt, (command: string) => {
       if (/^\./.test(`${command}`)) {
         const res = this.vm.executeMetaCommand(command);
-        if (res !== CB.CyberliteStatus) {
-          logger.error(res);
+        if (res !== propertyOf(CB.Result.Execution, (x) => x.OK)) {
+          logger.error(res as keyof CB.CyberliteError);
         }
       } else {
         try {
@@ -48,6 +50,7 @@ export default class CyberliteRepl {
     });
   };
 
+  /** Starts REPL session */
   start = () => {
     logger.welcome();
     this.run();

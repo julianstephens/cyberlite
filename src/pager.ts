@@ -1,7 +1,6 @@
 import {
   ReadStream,
   WriteStream,
-  close,
   createReadStream,
   createWriteStream,
   read,
@@ -14,15 +13,20 @@ import Cyberlite from "./cyberlite";
 import logger from "./logger";
 import { FixedArray } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
+import { propertyOf } from "./utils";
 
+/** Caches pages and writes to db file  */
 export default class Pager {
-  filename: string;
+  readonly filename: string;
   fileDescriptor: number;
   fileLength: number;
   rs: ReadStream;
   ws: WriteStream;
   pages: FixedArray<Buffer | null, 100>;
 
+  /**
+   * @param filename location of the db file
+   */
   constructor(filename: string) {
     this.filename = filename;
     this.getFile(filename)
@@ -36,11 +40,18 @@ export default class Pager {
         });
       })
       .catch(() => {
-        logger.error(CB.Error.System.CYBERLITE_INTERNAL);
+        logger.error(
+          propertyOf(CB.CyberliteError, (x) => x.CYBERLITE_INTERNAL),
+        );
         exit(1);
       });
   }
 
+  /**
+   * Opens the db file for writing
+   * @param filename location of the db file
+   * @returns file descriptor and file length
+   */
   getFile = async (filename: string) => {
     try {
       const { fd } = await open(filename, "w");
@@ -53,14 +64,19 @@ export default class Pager {
 
       return { fd, size };
     } catch {
-      logger.error(CB.Error.System.IOERR_OPEN);
+      logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_OPEN));
       exit(1);
     }
   };
 
+  /**
+   * Checks for page in cache or reads from db file
+   * @param pageNum page to retrieve
+   * @returns requested buffer
+   */
   getPage = (pageNum: number) => {
     if (pageNum > Cyberlite.TABLE_MAX_PAGES) {
-      logger.error(CB.Error.Execution.TABLE_FULL);
+      logger.error(propertyOf(CB.CyberliteError, (x) => x.TABLE_FULL));
       process.exit(1);
     }
 
@@ -80,7 +96,7 @@ export default class Pager {
           pageNum * Cyberlite.PAGE_SIZE,
           (err) => {
             if (err) {
-              logger.error(CB.Error.System.IOERR_READ);
+              logger.error(propertyOf(CB.Error.System, (x) => x.IOERR_READ));
               exit(1);
             }
           },
@@ -93,9 +109,13 @@ export default class Pager {
     return this.pages[pageNum];
   };
 
+  /**
+   * Commits changes in page cache
+   * @param pageNum
+   */
   flush = async (pageNum: number) => {
     if (!this.pages[pageNum]) {
-      logger.error(CB.Error.System.CYBERLITE_INTERNAL);
+      logger.error(propertyOf(CB.CyberliteError, (x) => x.CYBERLITE_INTERNAL));
       exit(1);
     }
 
@@ -107,13 +127,7 @@ export default class Pager {
       pageNum * Cyberlite.PAGE_SIZE,
       (err) => {
         if (err) {
-          logger.error(CB.Error.System.IOERR_WRITE);
-          close(this.fileDescriptor, (err) => {
-            if (err) {
-              logger.error(CB.Error.System.IOERR_CLOSE);
-              exit(1);
-            }
-          });
+          logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_WRITE));
           exit(1);
         }
       },
