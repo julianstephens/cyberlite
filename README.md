@@ -11,3 +11,7 @@ Typescript sqlite clone
 | .help                    | Display list of available commands |
 | .clear                   | Clear console                      |
 | .exit                    | Terminate program                  |
+
+### Docs
+
+https://julianstephens.github.io/cyberlite/
