@@ -25,7 +25,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">default</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/0615af8/src/pager.ts#L11">src/pager.ts:11</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L11">src/pager.ts:11</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -44,7 +44,8 @@
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Methods</h3>
-<div class="tsd-index-list"><a href="pager.default.html#flush" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-2048"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)"></path></g></svg><span>flush</span></a>
+<div class="tsd-index-list"><a href="pager.default.html#_handleError" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-2048"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)"></path></g></svg><span>#handle<wbr/>Error</span></a>
+<a href="pager.default.html#flush" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>flush</span></a>
 <a href="pager.default.html#getFile" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>File</span></a>
 <a href="pager.default.html#getPage" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Page</span></a>
 </div></section></div></details></section></section>
@@ -66,35 +67,50 @@
 <h4 class="tsd-returns-title">Returns <a href="pager.default.html" class="tsd-signature-type tsd-kind-class">default</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/0615af8/src/pager.ts#L20">src/pager.ts:20</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L20">src/pager.ts:20</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="_fileHandle" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>#file<wbr/>Handle</span><a href="#_fileHandle" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">#file<wbr/>Handle</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">FileHandle</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">#file<wbr/>Handle</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">FileHandle</span><span class="tsd-signature-symbol"> = null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/0615af8/src/pager.ts#L13">src/pager.ts:13</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L13">src/pager.ts:13</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="fileLength" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>file<wbr/>Length</span><a href="#fileLength" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">file<wbr/>Length</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/0615af8/src/pager.ts#L14">src/pager.ts:14</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L14">src/pager.ts:14</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="filename" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagReadonly">Readonly</code> <span>filename</span><a href="#filename" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">filename</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/0615af8/src/pager.ts#L12">src/pager.ts:12</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L12">src/pager.ts:12</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="pages" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>pages</span><a href="#pages" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">pages</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">]</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/0615af8/src/pager.ts#L15">src/pager.ts:15</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L15">src/pager.ts:15</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
+<section class="tsd-panel tsd-member tsd-is-private"><a id="_handleError" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>#handle<wbr/>Error</span><a href="#_handleError" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-private">
+<li class="tsd-signature tsd-anchor-link" id="_handleError._handleError-1"><span class="tsd-kind-call-signature">#handle<wbr/>Error</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">err</span>, <span class="tsd-kind-parameter">status</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#_handleError._handleError-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type">unknown</span></h5></li>
+<li>
+<h5><span class="tsd-kind-parameter">status</span>: <span class="tsd-signature-type">&quot;CYBERLITE_INTERNAL&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;IOERR_OPEN&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;IOERR_CLOSE&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;IOERR_READ&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;IOERR_WRITE&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;OUT_OF_BOUNDS&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TABLE_FULL&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;INVALID_SYNTAX&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;MISSING_PROP&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;UNKNOWN_COMMAND&quot;</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L30">src/pager.ts:30</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="flush" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>flush</span><a href="#flush" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="flush.flush-1"><span class="tsd-kind-call-signature">flush</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">pageNum</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#flush.flush-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="flush.flush-1"><span class="tsd-kind-call-signature">flush</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">pageNum</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#flush.flush-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Commits changes in page cache</p>
 </div>
@@ -104,10 +120,10 @@
 <li>
 <h5><span class="tsd-kind-parameter">pageNum</span>: <span class="tsd-signature-type">number</span></h5>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/0615af8/src/pager.ts#L100">src/pager.ts:100</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L113">src/pager.ts:113</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getFile" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>File</span><a href="#getFile" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -127,11 +143,11 @@
 
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/0615af8/src/pager.ts#L35">src/pager.ts:35</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L43">src/pager.ts:43</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getPage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Page</span><a href="#getPage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getPage.getPage-1"><span class="tsd-kind-call-signature">get<wbr/>Page</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">pageNum</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">&gt;</span><a href="#getPage.getPage-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="getPage.getPage-1"><span class="tsd-kind-call-signature">get<wbr/>Page</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">pageNum</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#getPage.getPage-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Checks for page in cache or reads from db file</p>
 </div>
@@ -143,11 +159,11 @@
 <div class="tsd-comment tsd-typography"><p>page to retrieve</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">&gt;</span></h4><p>requested buffer</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><p>requested buffer</p>
 
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/0615af8/src/pager.ts#L58">src/pager.ts:58</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/julianstephens/cyberlite/blob/2490c9d/src/pager.ts#L64">src/pager.ts:64</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -172,6 +188,7 @@
 <li><a href="#fileLength" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>file<wbr/>Length</span></a></li>
 <li><a href="#filename" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>filename</span></a></li>
 <li><a href="#pages" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>pages</span></a></li>
+<li><a href="#_handleError" class="tsd-is-private"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>#handle<wbr/>Error</span></a></li>
 <li><a href="#flush" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>flush</span></a></li>
 <li><a href="#getFile" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>File</span></a></li>
 <li><a href="#getPage" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Page</span></a></li></ul></div></details></div>
