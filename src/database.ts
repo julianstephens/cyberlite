@@ -1,11 +1,14 @@
 import env from "./env";
 import Table from "./table";
+import VM from "./vm";
 
 /**
  * Handles the database file
  */
 export default class Database {
-  tables: Table[] = [];
+  vm: VM;
+  tables: Record<string, Table> = {};
+  #activeTable: Table;
 
   // default: NTFS block size
   static readonly PAGE_SIZE: number = env.PAGE_SIZE;
@@ -17,31 +20,37 @@ export default class Database {
    * Opens db file and loads tables
    * @param filename location of the db file
    */
-  open = async (filename: string) => {
-    const table = new Table(filename);
-    this.tables.push(table);
+  open = (filename: string) => {
+    this.vm = new VM();
+    const table = new Table(filename, "users");
+    this.tables["users"] = table;
+    this.activeTable = table;
   };
 
-  /**
-   * Flushes data and resets page cache
-   * @param table table to close
-   */
-  static close = async (table: Table) => {
-    const numFullPages = ~~(table.numRows / table.rowsPerPage);
+  /** Flushes data and resets page cache */
+  close = () => {
+    Object.values(this.tables).forEach((table) => {
+      const numFullPages = ~~(table.numRows / table.rowsPerPage);
 
-    for (let i = 0; i < numFullPages; i++) {
-      if (!table.pager.pages[i]) {
-        continue;
+      for (let i = 0; i < numFullPages; i++) {
+        if (table.pager.pages[i]) {
+          table.pager.flush(i);
+          table.pager.pages[i] = null;
+        }
       }
 
-      table.pager.flush(i);
-      table.pager.pages[i] = null;
-    }
-
-    table.pager.pages.forEach((p, i) => {
-      if (p) {
-        table.pager.pages[i] = null;
-      }
+      table.pager.pages.forEach((p, i) => {
+        if (p) table.pager.pages[i] = null;
+      });
     });
   };
+
+  get activeTable(): Table {
+    return this.#activeTable;
+  }
+
+  set activeTable(value: Table) {
+    this.#activeTable = value;
+    this.tables[this.activeTable.name] = this.activeTable;
+  }
 }

@@ -30,6 +30,7 @@ export namespace Cyberlite {
       INSERTED: "'insert' operation successful",
       UPDATED: "'update' operation successful",
       DELETED: "'delete' operation successful",
+      EXITED: "exited",
     } as const;
 
     export type ExecutionStatus = EnumExtract<typeof Execution>;

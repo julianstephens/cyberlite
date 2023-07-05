@@ -33,3 +33,5 @@ build/
 .do_tasks
 
 .env*
+
+db

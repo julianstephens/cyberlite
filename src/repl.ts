@@ -1,18 +1,17 @@
 import readline from "node-color-readline";
+import { exit } from "process";
 import Database from "./database";
 import logger from "./logger";
 import Parser from "./parser";
 import { Readline } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
 import { colorize, COMPLETIONS, propertyOf } from "./utils";
-import VM from "./vm";
 
 /** Interactive REPL for Cyberlite */
 export default class CyberliteRepl {
   readonly rl: Readline;
   readonly db: Database;
   readonly #prompt = "\n> ";
-  readonly vm: VM;
 
   constructor(filename = "./db") {
     this.rl = readline.createInterface({
@@ -26,22 +25,27 @@ export default class CyberliteRepl {
     });
     this.db = new Database();
     this.db.open(filename);
-    this.vm = new VM();
   }
 
   /** Loops REPL session until terminated by user */
   run = () => {
     this.rl.question(this.#prompt, async (command: string) => {
       if (/^\./.test(`${command}`)) {
-        const res = this.vm.executeMetaCommand(command);
+        if (/^\.exit/.test(`${command}`)) {
+          this.db.close();
+          logger.log("Goodbye!");
+          exit();
+        }
+
+        const res = this.db.vm.executeMetaCommand(command);
         if (res !== propertyOf(CB.Result.Execution, (x) => x.OK)) {
           logger.error(res as CB.CyberliteErrorStatus);
         }
       } else {
         try {
           const statement = Parser.parseSqlStatement(`${command}`);
-          const res = await this.vm.execute(statement, this.db.tables[0]);
-          if (res) this.db.tables[0] = res;
+          const res = await this.db.vm.execute(statement, this.db.activeTable);
+          if (res) this.db.activeTable = res;
         } catch (err) {
           logger.error(err.name, err.message);
         }

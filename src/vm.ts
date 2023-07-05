@@ -1,7 +1,5 @@
 import chalk from "chalk";
 import convertHrtime from "convert-hrtime";
-import { exit } from "process";
-import Database from "./database";
 import logger from "./logger";
 import Parser from "./parser";
 import Table from "./table";
@@ -11,7 +9,6 @@ import { SQL_STATEMENT_TYPE, propertyOf } from "./utils";
 
 /** Executes statements and commits to page cache */
 export default class VM {
-  table: Table;
   parser: Parser;
 
   constructor() {
@@ -25,7 +22,7 @@ export default class VM {
     statement: ExecuteStatement,
     table: Table,
   ): Promise<CB.CyberliteStatus> => {
-    if (table.numRows >= 4) {
+    if (table.numRows >= table.maxRows) {
       logger.error(propertyOf(CB.CyberliteError, (x) => x.TABLE_FULL));
       return propertyOf(CB.CyberliteError, (x) => x.TABLE_FULL);
     }
@@ -39,9 +36,11 @@ export default class VM {
   };
 
   #executeSelect = async (table: Table): Promise<CB.CyberliteStatus> => {
-    for (let i = 0; i < table.numRows; i++) {
-      const [_, page, cursor] = await table.getRowSlot(i);
-      logger.log(this.parser.deserialize(page, cursor));
+    for (let i = 0; i <= table.numRows; i++) {
+      const page = table.pager.pages[~~(i / table.rowsPerPage)];
+      const [_, p, cursor] = await table.getRowSlot(i);
+      const useCachedPage = !page.equals(Buffer.alloc(page.length));
+      logger.log(this.parser.deserialize(useCachedPage ? page : p, cursor));
     }
 
     return propertyOf(CB.Result.Execution, (x) => x.OK);
@@ -92,29 +91,15 @@ export default class VM {
    * @returns OK or UNKNOWN_COMMAND
    */
   executeMetaCommand = (command: string): CB.CyberliteStatus => {
-    if (/^\.exit/.test(`${command}`)) {
-      logger.log("Goodbye!");
-      Database.close(this.table).catch((err) => {
-        logger.error(
-          propertyOf(CB.CyberliteError, (x) => x.CYBERLITE_INTERNAL),
-          {
-            message: err.message,
-          },
-        );
-        exit(1);
-      });
-      process.exit();
-    } else {
-      if (/^\.help/.test(command)) {
-        logger.help();
-        return propertyOf(CB.Result.Execution, (x) => x.OK);
-      }
-      if (/^\.clear/.test(command)) {
-        console.clear();
-        return propertyOf(CB.Result.Execution, (x) => x.OK);
-      }
-
-      return propertyOf(CB.CyberliteError, (x) => x.UNKNOWN_COMMAND);
+    if (/^\.help/.test(command)) {
+      logger.help();
+      return propertyOf(CB.Result.Execution, (x) => x.OK);
     }
+    if (/^\.clear/.test(command)) {
+      console.clear();
+      return propertyOf(CB.Result.Execution, (x) => x.OK);
+    }
+
+    return propertyOf(CB.CyberliteError, (x) => x.UNKNOWN_COMMAND);
   };
 }

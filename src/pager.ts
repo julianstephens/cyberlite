@@ -10,7 +10,7 @@ import { FileHandle } from "fs/promises";
 /** Caches pages and writes to db file  */
 export default class Pager {
   readonly filename: string;
-  #fileHandle: FileHandle;
+  #fileHandle: FileHandle | null = null;
   fileLength: number;
   pages: FixedArray<Buffer | null, 100>;
 
@@ -27,6 +27,14 @@ export default class Pager {
     });
   }
 
+  #handleError = (err: unknown, status: CB.CyberliteErrorStatus) => {
+    if (err) {
+      console.error(err);
+      logger.error(propertyOf(CB.CyberliteError, (x) => x[status]));
+      exit(1);
+    }
+  };
+
   /**
    * Opens the db file for writing
    * @param filename location of the db file
@@ -39,9 +47,7 @@ export default class Pager {
       // open with 'w' flag creates file or truncates existing
       this.#fileHandle = await fs.promises.open(filename, "w");
     } catch (err) {
-      console.error(err);
-      logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_READ));
-      exit(1);
+      this.#handleError(err, "IOERR_READ");
     } finally {
       this.#fileHandle?.close();
       this.#fileHandle = null;
@@ -55,68 +61,85 @@ export default class Pager {
    * @param pageNum page to retrieve
    * @returns requested buffer
    */
-  getPage = async (pageNum: number) => {
+  getPage = (pageNum: number) => {
     if (pageNum > Database.TABLE_MAX_PAGES) {
       logger.error(propertyOf(CB.CyberliteError, (x) => x.TABLE_FULL));
       process.exit(1);
     }
 
     // page not cached. create and load from db file
-    if (!this.pages[pageNum]) {
-      const page = Buffer.alloc(Database.PAGE_SIZE);
-      let numPages = ~~(this.fileLength / Database.PAGE_SIZE);
+    const page = Buffer.alloc(Database.PAGE_SIZE);
+    let numPages = ~~(this.fileLength / Database.PAGE_SIZE);
+    let parsedPage;
 
-      if (this.fileLength % Database.PAGE_SIZE) numPages++;
+    if (this.fileLength % Database.PAGE_SIZE) numPages++;
 
-      if (pageNum <= numPages) {
-        try {
-          this.#fileHandle = await fs.promises.open(this.filename, "w");
-          await this.#fileHandle.read(
-            page,
-            0,
-            Database.PAGE_SIZE,
-            pageNum * Database.PAGE_SIZE,
-          );
-        } catch (err) {
-          console.error(err);
-          logger.error(propertyOf(CB.Error.System, (x) => x.IOERR_READ));
-          exit(1);
-        } finally {
-          this.#fileHandle?.close();
-          this.#fileHandle = null;
-        }
-      }
-
-      this.pages[pageNum] = page;
+    if (pageNum <= numPages) {
+      fs.promises.open(this.filename, "w").then(
+        async (fh) => {
+          const size = fs.statSync(this.filename).size;
+          if (size && size !== 0) {
+            fh.read(
+              page,
+              0,
+              Database.PAGE_SIZE,
+              pageNum * Database.PAGE_SIZE,
+            ).then(
+              async () => {
+                parsedPage = page;
+                await fh.close();
+              },
+              (err) => {
+                this.#handleError(err, "IOERR_READ");
+              },
+            );
+          } else {
+            parsedPage = page;
+            await fh.close();
+          }
+        },
+        (err) => {
+          this.#handleError(err, "IOERR_OPEN");
+        },
+      );
     }
-
-    return this.pages[pageNum];
+    return parsedPage;
   };
 
   /**
    * Commits changes in page cache
    * @param pageNum
    */
-  flush = async (pageNum: number) => {
+  flush = (pageNum: number) => {
     if (!this.pages[pageNum]) {
       logger.error(propertyOf(CB.CyberliteError, (x) => x.CYBERLITE_INTERNAL));
       exit(1);
     }
 
-    try {
-      this.#fileHandle = await fs.promises.open(this.filename, "w");
-      this.#fileHandle.write(
-        this.pages[pageNum],
-        0,
-        Database.PAGE_SIZE,
-        pageNum * Database.PAGE_SIZE,
-      );
-    } catch (err) {
-      logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_WRITE));
-      exit(1);
-    } finally {
-      this.#fileHandle?.close();
-      this.#fileHandle = null;
-    }
+    fs.promises.open(this.filename, "w").then(
+      async (fh) => {
+        fh.write(
+          this.pages[pageNum],
+          0,
+          Database.PAGE_SIZE,
+          pageNum * Database.PAGE_SIZE,
+        ).then(
+          () => {
+            fh.close().then(
+              () => {},
+              (err) => {
+                this.#handleError(err, "IOERR_CLOSE");
+              },
+            );
+          },
+          (err) => {
+            this.#handleError(err, "IOERR_WRITE");
+          },
+        );
+      },
+      (err) => {
+        this.#handleError(err, "IOERR_OPEN");
+      },
+    );
   };
 }
