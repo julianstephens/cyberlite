@@ -1,7 +1,6 @@
-/**/*.js
+**/*.js
 build
 __tests__
 tsup.config.ts
-types
 docs
 coverage

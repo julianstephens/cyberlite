@@ -47,20 +47,17 @@ class Logger {
   error = (error: CB.CyberliteErrorStatus, options?: ErrorOptions) => {
     switch (error) {
       case "MISSING_PROP":
-        this.#errorProp("Missing", "param", options.prop);
+        this.#errorProp("Missing", "param", options?.prop);
         break;
       case "UNKNOWN_COMMAND":
         this.#errorProp(
           "Unrecognized",
-          options.propType || "param",
-          options.prop,
+          options?.propType || "keyword",
+          options?.prop,
         );
         break;
       default:
-        this.#handleError(
-          error,
-          options?.message || CB.CyberliteError[error].split(":")[1].trim(),
-        );
+        this.#handleError(error, options?.message || CB.CyberliteError[error]);
         break;
     }
   };

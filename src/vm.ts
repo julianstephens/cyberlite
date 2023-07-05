@@ -36,9 +36,9 @@ export default class VM {
   };
 
   #executeSelect = async (table: Table): Promise<CB.CyberliteStatus> => {
-    for (let i = 0; i <= table.numRows; i++) {
+    for (let i = 0; i < table.numRows; i++) {
       const page = table.pager.pages[~~(i / table.rowsPerPage)];
-      const [_, p, cursor] = await table.getRowSlot(i);
+      const [, p, cursor] = await table.getRowSlot(i);
       const useCachedPage = !page.equals(Buffer.alloc(page.length));
       logger.log(this.parser.deserialize(useCachedPage ? page : p, cursor));
     }
@@ -65,17 +65,29 @@ export default class VM {
             table,
           );
         } catch (err) {
-          logger.error(err.name, err.message);
+          logger.error(err.name, {
+            ...(err.name ===
+            propertyOf(CB.CyberliteError, (x) => x.MISSING_PROP)
+              ? { prop: err.message }
+              : { message: err.message }),
+          });
           return undefined;
         }
         break;
       case SQL_STATEMENT_TYPE.SELECT:
         executionResult = await this.#executeSelect(table);
         break;
+      default:
+        executionResult = "UNKNOWN_COMMAND";
+        break;
     }
 
     if (executionResult !== propertyOf(CB.Result.Execution, (x) => x.OK)) {
-      logger.error(executionResult as CB.CyberliteErrorStatus);
+      const prop =
+        executionResult === "UNKNOWN_COMMAND" ? statement.type : undefined;
+      logger.error(executionResult as CB.CyberliteErrorStatus, {
+        prop,
+      });
       return undefined;
     }
 

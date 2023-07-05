@@ -16,6 +16,8 @@ declare module "readline" {
   type cb = (command: string) => void;
 
   function question(prompt: string, cb: cb): void;
+
+  function close(): void;
 }
 
 declare module "node-color-readline" {

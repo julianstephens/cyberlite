@@ -6,15 +6,15 @@ export default class Table {
   readonly name: string;
   readonly rowsPerPage: number;
   readonly maxRows: number;
-  numRows: number = 0;
-  pager: Pager;
 
-  constructor(filename: string, name: string) {
+  pager: Pager;
+  numRows = 0;
+
+  constructor(path: string, name: string) {
     this.name = name;
     this.rowsPerPage = ~~(Database.PAGE_SIZE / Database.MAX_ROW_SIZE);
     this.maxRows = this.rowsPerPage * Database.TABLE_MAX_PAGES;
-    // this.numRows = ~~(this.pager.fileLength / Database.MAX_ROW_SIZE);
-    this.pager = new Pager(filename);
+    this.pager = new Pager(path);
   }
 
   /**
@@ -29,7 +29,7 @@ export default class Table {
 
     const page =
       this.pager.pages[pageNum] ?? // check page cache
-      this.pager.getPage(pageNum) ?? // check db file
+      (await this.pager.getPage(pageNum)) ?? // check db file
       Buffer.alloc(Database.PAGE_SIZE); // create new page
 
     return [pageNum, page, byteOffset];

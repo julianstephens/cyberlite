@@ -23,9 +23,10 @@ export default class Parser {
         type: SQL_STATEMENT_TYPE.SELECT,
         command: statement.slice(6),
       };
+    } else {
+      return throwError("UNKNOWN_COMMAND", statement);
     }
-    
-    return {} as SqlStatement;
+
     // FIXME: handle error without returning
   };
 

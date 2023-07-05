@@ -15,7 +15,7 @@
     "build:watch": "dotenv -- tsup --watch",
     "lint": "eslint . --ext .ts --ext .mts",
     "test": "dotenv -- jest --coverage --silent",
-    "prettier": "prettier --config .prettierrc --write .",
+    "format": "prettier --config .prettierrc --write .",
     "test:watch": "dotenv -- jest --watch --silent"
   },
   "dependencies": {
@@ -35,7 +35,7 @@
     "@typescript-eslint/parser": "~5.59",
     "dotenv-cli": "^7.2.1",
     "eslint": "~8.38",
-    "eslint-config-prettier": "~8.8",
+    "eslint-config-prettier": "~8.8.0",
     "eslint-plugin-jest": "~27.2",
     "jest": "~29.5",
     "mock-stdin": "^1.0.0",

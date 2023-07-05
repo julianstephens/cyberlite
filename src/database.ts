@@ -18,23 +18,23 @@ export default class Database {
 
   /**
    * Opens db file and loads tables
-   * @param filename location of the db file
+   * @param path location of the db file
    */
-  open = (filename: string) => {
+  open = (path: string) => {
     this.vm = new VM();
-    const table = new Table(filename, "users");
+    const table = new Table(path, "users");
     this.tables["users"] = table;
     this.activeTable = table;
   };
 
   /** Flushes data and resets page cache */
-  close = () => {
-    Object.values(this.tables).forEach((table) => {
-      const numFullPages = ~~(table.numRows / table.rowsPerPage);
+  close = async () => {
+    Object.values(this.tables).forEach(async (table) => {
+      const numFullPages = Math.ceil(table.numRows / table.rowsPerPage);
 
       for (let i = 0; i < numFullPages; i++) {
         if (table.pager.pages[i]) {
-          table.pager.flush(i);
+          await table.pager.flush(i);
           table.pager.pages[i] = null;
         }
       }

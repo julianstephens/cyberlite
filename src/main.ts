@@ -11,10 +11,14 @@ program
   .version(env.VERSION)
   .description("A Typescript sqlite clone")
   .argument(
-    "[filename]",
-    "The name of the database file to read from or create.",
+    "[path]",
+    "The location of the database file to read from or create.",
   )
-  .action((filename: string) => {
-    new CyberliteRepl(filename).start();
+  .action((path: string) => {
+    new CyberliteRepl(path).start();
   })
   .parse(process.argv);
+
+process.on("SIGTERM", () => {
+  program.exitOverride();
+});

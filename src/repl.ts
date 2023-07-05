@@ -1,11 +1,10 @@
 import readline from "node-color-readline";
-import { exit } from "process";
 import Database from "./database";
 import logger from "./logger";
 import Parser from "./parser";
 import { Readline } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
-import { colorize, COMPLETIONS, propertyOf } from "./utils";
+import { COMPLETIONS, colorize, propertyOf } from "./utils";
 
 /** Interactive REPL for Cyberlite */
 export default class CyberliteRepl {
@@ -13,7 +12,7 @@ export default class CyberliteRepl {
   readonly db: Database;
   readonly #prompt = "\n> ";
 
-  constructor(filename = "./db") {
+  constructor(path = "/home/julian/workspace/cyberlite/db") {
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -24,19 +23,24 @@ export default class CyberliteRepl {
       },
     });
     this.db = new Database();
-    this.db.open(filename);
+    this.db.open(path);
   }
 
   /** Loops REPL session until terminated by user */
-  run = () => {
-    this.rl.question(this.#prompt, async (command: string) => {
-      if (/^\./.test(`${command}`)) {
-        if (/^\.exit/.test(`${command}`)) {
-          this.db.close();
-          logger.log("Goodbye!");
-          exit();
+  run = async () => {
+    for await (const command of this.repl()) {
+      // got .exit, commiting and terminating
+      if (/^\.exit/.test(`${command}`)) {
+        try {
+          await this.db.close();
+        } catch (err) {
+          console.error(err);
         }
+        logger.log("Goodbye!");
+        break;
+      }
 
+      if (/^\./.test(`${command}`)) {
         const res = this.db.vm.executeMetaCommand(command);
         if (res !== propertyOf(CB.Result.Execution, (x) => x.OK)) {
           logger.error(res as CB.CyberliteErrorStatus);
@@ -47,12 +51,38 @@ export default class CyberliteRepl {
           const res = await this.db.vm.execute(statement, this.db.activeTable);
           if (res) this.db.activeTable = res;
         } catch (err) {
-          logger.error(err.name, err.message);
+          logger.error(err.name, {
+            ...(err.name ===
+            propertyOf(CB.CyberliteError, (x) => x.UNKNOWN_COMMAND)
+              ? { prop: err.message }
+              : { message: err.message }),
+          });
         }
       }
-      this.run();
-    });
+    }
   };
+
+  *repl() {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      colorize,
+      completer: (line: string) => {
+        const hits = COMPLETIONS.filter((c) => c.startsWith(line));
+        return [hits.length ? hits : COMPLETIONS, line];
+      },
+    });
+
+    try {
+      for (;;) {
+        yield new Promise<string>((resolve) =>
+          rl.question(this.#prompt, resolve),
+        );
+      }
+    } finally {
+      rl.close();
+    }
+  }
 
   /** Starts REPL session */
   start = () => {
