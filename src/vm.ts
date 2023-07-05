@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import convertHrtime from "convert-hrtime";
 import { exit } from "process";
-import Database from "./cyberlite";
+import Database from "./database";
 import logger from "./logger";
 import Parser from "./parser";
 import Table from "./table";
@@ -21,16 +21,16 @@ export default class VM {
   #getExecutionTime = (time: bigint) =>
     convertHrtime(process.hrtime.bigint() - time).milliseconds.toFixed(2);
 
-  #executeInsert = (
+  #executeInsert = async (
     statement: ExecuteStatement,
     table: Table,
-  ): CB.CyberliteStatus => {
+  ): Promise<CB.CyberliteStatus> => {
     if (table.numRows >= 4) {
       logger.error(propertyOf(CB.CyberliteError, (x) => x.TABLE_FULL));
       return propertyOf(CB.CyberliteError, (x) => x.TABLE_FULL);
     }
 
-    const [pageNum, page, cursor] = table.getRowSlot(table.numRows);
+    const [pageNum, page, cursor] = await table.getRowSlot(table.numRows);
     this.parser.serialize(statement.row, page, cursor);
     table.pager.pages[pageNum] = page;
     table.numRows++;
@@ -38,9 +38,9 @@ export default class VM {
     return propertyOf(CB.Result.Execution, (x) => x.OK);
   };
 
-  #executeSelect = (table: Table): CB.CyberliteStatus => {
+  #executeSelect = async (table: Table): Promise<CB.CyberliteStatus> => {
     for (let i = 0; i < table.numRows; i++) {
-      const [_, page, cursor] = table.getRowSlot(i);
+      const [_, page, cursor] = await table.getRowSlot(i);
       logger.log(this.parser.deserialize(page, cursor));
     }
 
@@ -53,7 +53,7 @@ export default class VM {
    * @param table table to execute on
    * @returns modified table
    */
-  execute = (statement: SqlStatement, table: Table) => {
+  execute = async (statement: SqlStatement, table: Table) => {
     const startTime = process.hrtime.bigint();
     let executionResult: CB.CyberliteStatus;
 
@@ -61,7 +61,7 @@ export default class VM {
       case SQL_STATEMENT_TYPE.INSERT:
         try {
           const res = this.parser.parseCommand(statement.command);
-          executionResult = this.#executeInsert(
+          executionResult = await this.#executeInsert(
             { ...statement, row: res } as ExecuteStatement,
             table,
           );
@@ -71,7 +71,7 @@ export default class VM {
         }
         break;
       case SQL_STATEMENT_TYPE.SELECT:
-        executionResult = this.#executeSelect(table);
+        executionResult = await this.#executeSelect(table);
         break;
     }
 

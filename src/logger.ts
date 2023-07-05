@@ -57,7 +57,10 @@ class Logger {
         );
         break;
       default:
-        this.#handleError(error, options.message || CB.CyberliteError[error]);
+        this.#handleError(
+          error,
+          options?.message || CB.CyberliteError[error].split(":")[1].trim(),
+        );
         break;
     }
   };

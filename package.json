@@ -3,20 +3,20 @@
   "description": "A Typescript sqlite clone",
   "version": "0.1.0",
   "type": "module",
-  "main": "./build/main.cjs",
+  "main": "./build/main.js",
   "engines": {
     "node": ">= 18.12 <19"
   },
   "scripts": {
-    "start": "node build/main.js",
+    "start": "dotenv -- node ./build/main.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "pnpm lint",
-    "build": "tsup",
-    "build:watch": "tsup --watch",
+    "build": "dotenv -- tsup",
+    "build:watch": "dotenv -- tsup --watch",
     "lint": "eslint . --ext .ts --ext .mts",
-    "test": "jest --coverage --silent",
+    "test": "dotenv -- jest --coverage --silent",
     "prettier": "prettier --config .prettierrc --write .",
-    "test:watch": "jest --watch --silent"
+    "test:watch": "dotenv -- jest --watch --silent"
   },
   "dependencies": {
     "chalk": "^5.3.0",
@@ -25,16 +25,15 @@
     "envalid": "^7.3.1",
     "figlet": "^1.6.0",
     "node-color-readline": "^1.0.1",
-    "tslib": "~2.5",
-    "yargs": "^17.7.2"
+    "tslib": "~2.5"
   },
   "devDependencies": {
     "@types/figlet": "^1.5.6",
     "@types/jest": "~29.5.2",
     "@types/node": "~18.16.19",
-    "@types/yargs": "^17.0.24",
     "@typescript-eslint/eslint-plugin": "~5.59",
     "@typescript-eslint/parser": "~5.59",
+    "dotenv-cli": "^7.2.1",
     "eslint": "~8.38",
     "eslint-config-prettier": "~8.8",
     "eslint-plugin-jest": "~27.2",

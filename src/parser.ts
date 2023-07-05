@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import Database from "./cyberlite";
+import Database from "./database";
 import logger from "./logger";
 import { Row, SqlStatement } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
@@ -24,6 +24,8 @@ export default class Parser {
         command: statement.slice(6),
       };
     }
+    
+    return {} as SqlStatement;
     // FIXME: handle error without returning
   };
 

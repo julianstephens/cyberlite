@@ -17,8 +17,10 @@ export const COMPLETIONS = [
 
 export const HELP_MSG = `
 ${chalk.blue("cyberlite repl commands")}
+${chalk.magenta.bold("insert")} <data>        add a new row to the current table
+${chalk.magenta.bold("select")}        retrieve all rows from the current table
 ${chalk.yellow(".clear")}        clear all the code
-${chalk.magenta(".help")}         print this manual
+${chalk.blue(".help")}         print this manual
 ${chalk.red(".exit")}         leave the repl
 ` as const;
 

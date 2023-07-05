@@ -1,5 +1,5 @@
 import readline from "node-color-readline";
-import Database from "./cyberlite";
+import Database from "./database";
 import logger from "./logger";
 import Parser from "./parser";
 import { Readline } from "./types";
@@ -31,7 +31,7 @@ export default class CyberliteRepl {
 
   /** Loops REPL session until terminated by user */
   run = () => {
-    this.rl.question(this.#prompt, (command: string) => {
+    this.rl.question(this.#prompt, async (command: string) => {
       if (/^\./.test(`${command}`)) {
         const res = this.vm.executeMetaCommand(command);
         if (res !== propertyOf(CB.Result.Execution, (x) => x.OK)) {
@@ -40,7 +40,7 @@ export default class CyberliteRepl {
       } else {
         try {
           const statement = Parser.parseSqlStatement(`${command}`);
-          const res = this.vm.execute(statement, this.db.tables[0]);
+          const res = await this.vm.execute(statement, this.db.tables[0]);
           if (res) this.db.tables[0] = res;
         } catch (err) {
           logger.error(err.name, err.message);

@@ -1,10 +1,5 @@
-import { close } from "fs";
-import { exit } from "process";
 import env from "./env";
-import logger from "./logger";
 import Table from "./table";
-import { Cyberlite as CB } from "./types/cyberlite";
-import { propertyOf } from "./utils";
 
 /**
  * Handles the database file
@@ -28,7 +23,7 @@ export default class Database {
   };
 
   /**
-   * Flushes cached data and closes db file
+   * Flushes data and resets page cache
    * @param table table to close
    */
   static close = async (table: Table) => {
@@ -42,13 +37,6 @@ export default class Database {
       table.pager.flush(i);
       table.pager.pages[i] = null;
     }
-
-    close(table.pager.fileDescriptor, (err) => {
-      if (err) {
-        logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_CLOSE));
-        exit(1);
-      }
-    });
 
     table.pager.pages.forEach((p, i) => {
       if (p) {

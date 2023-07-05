@@ -1,27 +1,17 @@
-import {
-  ReadStream,
-  WriteStream,
-  createReadStream,
-  createWriteStream,
-  read,
-  stat,
-  write,
-} from "fs";
-import { open } from "fs/promises";
+import fs from "fs";
 import { exit } from "process";
-import Database from "./cyberlite";
+import Database from "./database";
 import logger from "./logger";
 import { FixedArray } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
 import { propertyOf } from "./utils";
+import { FileHandle } from "fs/promises";
 
 /** Caches pages and writes to db file  */
 export default class Pager {
   readonly filename: string;
-  fileDescriptor: number;
+  #fileHandle: FileHandle;
   fileLength: number;
-  rs: ReadStream;
-  ws: WriteStream;
   pages: FixedArray<Buffer | null, 100>;
 
   /**
@@ -29,22 +19,12 @@ export default class Pager {
    */
   constructor(filename: string) {
     this.filename = filename;
-    this.getFile(filename)
-      .then(({ fd, size }) => {
-        this.fileDescriptor = fd;
-        this.fileLength = size;
-        this.rs = createReadStream("", { fd });
-        this.ws = createWriteStream("", { fd });
-        this.pages = Array.apply(null, {
-          length: Database.TABLE_MAX_PAGES,
-        });
-      })
-      .catch(() => {
-        logger.error(
-          propertyOf(CB.CyberliteError, (x) => x.CYBERLITE_INTERNAL),
-        );
-        exit(1);
+    this.getFile(filename).then((size) => {
+      this.fileLength = size;
+      this.pages = Array.apply(null, {
+        length: Database.TABLE_MAX_PAGES,
       });
+    });
   }
 
   /**
@@ -53,20 +33,21 @@ export default class Pager {
    * @returns file descriptor and file length
    */
   getFile = async (filename: string) => {
+    let size: number;
+
     try {
-      const { fd } = await open(filename, "w");
-
-      let size: number;
-      stat(filename, (err, stats) => {
-        if (err) throw err;
-        size = stats.size;
-      });
-
-      return { fd, size };
-    } catch {
-      logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_OPEN));
+      // open with 'w' flag creates file or truncates existing
+      this.#fileHandle = await fs.promises.open(filename, "w");
+    } catch (err) {
+      console.error(err);
+      logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_READ));
       exit(1);
+    } finally {
+      this.#fileHandle?.close();
+      this.#fileHandle = null;
     }
+
+    return size;
   };
 
   /**
@@ -74,7 +55,7 @@ export default class Pager {
    * @param pageNum page to retrieve
    * @returns requested buffer
    */
-  getPage = (pageNum: number) => {
+  getPage = async (pageNum: number) => {
     if (pageNum > Database.TABLE_MAX_PAGES) {
       logger.error(propertyOf(CB.CyberliteError, (x) => x.TABLE_FULL));
       process.exit(1);
@@ -88,19 +69,22 @@ export default class Pager {
       if (this.fileLength % Database.PAGE_SIZE) numPages++;
 
       if (pageNum <= numPages) {
-        read(
-          this.fileDescriptor,
-          page,
-          0,
-          Database.PAGE_SIZE,
-          pageNum * Database.PAGE_SIZE,
-          (err) => {
-            if (err) {
-              logger.error(propertyOf(CB.Error.System, (x) => x.IOERR_READ));
-              exit(1);
-            }
-          },
-        );
+        try {
+          this.#fileHandle = await fs.promises.open(this.filename, "w");
+          await this.#fileHandle.read(
+            page,
+            0,
+            Database.PAGE_SIZE,
+            pageNum * Database.PAGE_SIZE,
+          );
+        } catch (err) {
+          console.error(err);
+          logger.error(propertyOf(CB.Error.System, (x) => x.IOERR_READ));
+          exit(1);
+        } finally {
+          this.#fileHandle?.close();
+          this.#fileHandle = null;
+        }
       }
 
       this.pages[pageNum] = page;
@@ -119,18 +103,20 @@ export default class Pager {
       exit(1);
     }
 
-    write(
-      this.fileDescriptor,
-      this.pages[pageNum],
-      0,
-      Database.PAGE_SIZE,
-      pageNum * Database.PAGE_SIZE,
-      (err) => {
-        if (err) {
-          logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_WRITE));
-          exit(1);
-        }
-      },
-    );
+    try {
+      this.#fileHandle = await fs.promises.open(this.filename, "w");
+      this.#fileHandle.write(
+        this.pages[pageNum],
+        0,
+        Database.PAGE_SIZE,
+        pageNum * Database.PAGE_SIZE,
+      );
+    } catch (err) {
+      logger.error(propertyOf(CB.CyberliteError, (x) => x.IOERR_WRITE));
+      exit(1);
+    } finally {
+      this.#fileHandle?.close();
+      this.#fileHandle = null;
+    }
   };
 }

@@ -1,5 +1,5 @@
 import { SQL_STATEMENT_TYPE } from "@/utils";
-import { ReadStream, WriteStream } from "fs";
+import fs from "fs";
 import readline from "node-color-readline";
 
 export type EnumExtract<T> = T[keyof T];
@@ -21,8 +21,8 @@ export type Row = {
 export type Pager = {
   fileDescriptor: number;
   fileLength: number;
-  rs: ReadStream;
-  ws: WriteStream;
+  rs: fs.ReadStream;
+  ws: fs.WriteStream;
   pages: FixedArray<Buffer | null, 100>;
 };
 
