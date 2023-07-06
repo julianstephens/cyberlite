@@ -30,16 +30,18 @@ export default class VM {
     const [pageNum, page, cursor] = await table.getRowSlot(table.numRows);
     this.parser.serialize(statement.row, page, cursor);
     table.pager.pages[pageNum] = page;
-    table.numRows++;
+    table.numRows = table.numRows + 1;
 
     return propertyOf(CB.Result.Execution, (x) => x.OK);
   };
 
   #executeSelect = async (table: Table): Promise<CB.CyberliteStatus> => {
+    let pageNum = 0;
     for (let i = 0; i < table.numRows; i++) {
-      const page = table.pager.pages[~~(i / table.rowsPerPage)];
+      pageNum = ~~(i / table.rowsPerPage);
+      const page = table.pager.pages[pageNum];
       const [, p, cursor] = await table.getRowSlot(i);
-      const useCachedPage = !page.equals(Buffer.alloc(page.length));
+      const useCachedPage = !page || !page.equals(Buffer.alloc(page.length));
       logger.log(this.parser.deserialize(useCachedPage ? page : p, cursor));
     }
 

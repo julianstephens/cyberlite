@@ -7,14 +7,22 @@ export default class Table {
   readonly rowsPerPage: number;
   readonly maxRows: number;
 
+  #numRows: number;
   pager: Pager;
-  numRows = 0;
 
-  constructor(path: string, name: string) {
+  constructor(name: string, path: string) {
     this.name = name;
     this.rowsPerPage = ~~(Database.PAGE_SIZE / Database.MAX_ROW_SIZE);
     this.maxRows = this.rowsPerPage * Database.TABLE_MAX_PAGES;
     this.pager = new Pager(path);
+  }
+
+  get numRows(): number {
+    return this.#numRows;
+  }
+
+  set numRows(value: number) {
+    this.#numRows = value;
   }
 
   /**
@@ -24,8 +32,7 @@ export default class Table {
    */
   getRowSlot = async (rowNum: number): Promise<[number, Buffer, number]> => {
     const pageNum = ~~(rowNum / this.rowsPerPage);
-    const rowOffset = rowNum % this.rowsPerPage;
-    const byteOffset = rowOffset * Database.MAX_ROW_SIZE;
+    const byteOffset = (rowNum % this.rowsPerPage) * Database.MAX_ROW_SIZE;
 
     const page =
       this.pager.pages[pageNum] ?? // check page cache

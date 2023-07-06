@@ -13,16 +13,11 @@ export default class Pager {
   fileLength: number;
   pages: FixedArray<Buffer | null, 100>;
 
-  /**
-   * @param path location of the db file
-   */
   constructor(path: string) {
     this.path = path;
-    this.getFile(path).then((size) => {
-      this.fileLength = size;
-      this.pages = Array.apply(null, {
-        length: Database.TABLE_MAX_PAGES,
-      });
+    this.fileLength = 0;
+    this.pages = Array.apply(null, {
+      length: Database.TABLE_MAX_PAGES,
     });
   }
 
@@ -37,26 +32,29 @@ export default class Pager {
   };
 
   /**
-   * Opens the db file for writing
+   * Loads pages from existing db file or creates a new one
    * @param path location of the db file
-   * @returns file descriptor and file length
+   * @returns file length
    */
-  getFile = async (path: string) => {
-    let size: number;
-
+  loadData = async () => {
     try {
-      // open with 'w' flag creates file or truncates existing
-      this.#fileHandle = await fsPromises.open(path, "w");
-      const stats = await this.#fileHandle.stat();
-      size = stats.size;
+      this.#fileHandle = await fsPromises.open(this.path, "a+");
+      const { size } = await this.#fileHandle.stat();
+      this.fileLength = size;
+      const rs = this.#fileHandle.createReadStream({
+        highWaterMark: Database.PAGE_SIZE,
+      });
+
+      for await (const chunk of rs) {
+        const openPage = this.pages.findIndex((p) => !p);
+        if (openPage >= 0) this.pages[openPage] = chunk;
+      }
     } catch (err) {
       this.#handleError("IOERR_OPEN", err);
     } finally {
       await this.#fileHandle?.close();
       this.#fileHandle = null;
     }
-
-    return size;
   };
 
   /**
@@ -78,7 +76,7 @@ export default class Pager {
 
     if (pageNum <= numPages) {
       try {
-        this.#fileHandle = await fsPromises.open(this.path, "a+");
+        this.#fileHandle = await fsPromises.open(this.path, "r");
         const { size } = await this.#fileHandle.stat();
         if (size && size > 0) {
           const res = await this.#fileHandle.read(

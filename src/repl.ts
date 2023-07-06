@@ -1,5 +1,6 @@
 import readline from "node-color-readline";
 import Database from "./database";
+import env from "./env";
 import logger from "./logger";
 import Parser from "./parser";
 import { Readline } from "./types";
@@ -23,20 +24,39 @@ export default class CyberliteRepl {
       },
     });
     this.db = new Database();
-    this.db.open(path);
+    this.db.open(path).catch((err) => {
+      console.error(err);
+      logger.error("CYBERLITE_INTERNAL", {
+        message: "Could not initialize database",
+      });
+      throw new Error("Could not initialize database");
+    });
   }
+
+  /** Starts REPL session */
+  start = () => {
+    logger.welcome();
+    this.run();
+  };
+
+  /** Closes db connection and quits repl */
+  stop = async () => {
+    try {
+      await this.db.close();
+    } catch (err) {
+      console.error(err);
+    }
+    logger.log("Goodbye!");
+    if (env.NODE_ENV === "test") {
+      return this.rl.close();
+    }
+  };
 
   /** Loops REPL session until terminated by user */
   run = async () => {
     for await (const command of this.repl()) {
-      // got .exit, commiting and terminating
       if (/^\.exit/.test(`${command}`)) {
-        try {
-          await this.db.close();
-        } catch (err) {
-          console.error(err);
-        }
-        logger.log("Goodbye!");
+        await this.stop();
         break;
       }
 
@@ -83,10 +103,4 @@ export default class CyberliteRepl {
       rl.close();
     }
   }
-
-  /** Starts REPL session */
-  start = () => {
-    logger.welcome();
-    this.run();
-  };
 }

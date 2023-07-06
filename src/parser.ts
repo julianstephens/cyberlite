@@ -26,8 +26,6 @@ export default class Parser {
     } else {
       return throwError("UNKNOWN_COMMAND", statement);
     }
-
-    // FIXME: handle error without returning
   };
 
   /**

@@ -14,9 +14,10 @@
     "build": "dotenv -- tsup",
     "build:watch": "dotenv -- tsup --watch",
     "lint": "eslint . --ext .ts --ext .mts",
-    "test": "dotenv -- jest --coverage --silent",
     "format": "prettier --config .prettierrc --write .",
-    "test:watch": "dotenv -- jest --watch --silent"
+    "test": "dotenv -- jest --coverage --silent",
+    "test:watch": "dotenv -- jest --watch --silent",
+    "test:ui": "dotenv -- majestic"
   },
   "dependencies": {
     "chalk": "^5.3.0",
@@ -28,6 +29,7 @@
     "tslib": "~2.5"
   },
   "devDependencies": {
+    "@automock/jest": "^1.2.1",
     "@types/figlet": "^1.5.6",
     "@types/jest": "~29.5.2",
     "@types/node": "~18.16.19",
@@ -38,6 +40,7 @@
     "eslint-config-prettier": "~8.8.0",
     "eslint-plugin-jest": "~27.2",
     "jest": "~29.5",
+    "majestic": "^1.8.1",
     "mock-stdin": "^1.0.0",
     "prettier": "~2.8",
     "rimraf": "~5.0",

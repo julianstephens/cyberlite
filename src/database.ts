@@ -20,9 +20,12 @@ export default class Database {
    * Opens db file and loads tables
    * @param path location of the db file
    */
-  open = (path: string) => {
+  open = async (path: string) => {
     this.vm = new VM();
-    const table = new Table(path, "users");
+
+    const table = new Table("users", path);
+    await table.pager.loadData();
+    table.numRows = ~~(table.pager.fileLength / Database.MAX_ROW_SIZE);
     this.tables["users"] = table;
     this.activeTable = table;
   };

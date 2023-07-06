@@ -18,12 +18,14 @@ export type Row = {
   email: string;
 };
 
+export type Pages = FixedArray<Buffer | null, 100>;
+
 export type Pager = {
   fileDescriptor: number;
   fileLength: number;
   rs: fs.ReadStream;
   ws: fs.WriteStream;
-  pages: FixedArray<Buffer | null, 100>;
+  pages: Pages;
 };
 
 export type Table = {
