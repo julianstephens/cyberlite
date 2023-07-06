@@ -25,7 +25,9 @@ export default class Database {
 
     const table = new Table("users", path);
     await table.pager.loadData();
-    table.numRows = ~~(table.pager.fileLength / Database.MAX_ROW_SIZE);
+    table.numRows = table.endCursor.currentRow = ~~(
+      table.pager.fileLength / Database.MAX_ROW_SIZE
+    );
     this.tables["users"] = table;
     this.activeTable = table;
   }
@@ -33,7 +35,7 @@ export default class Database {
   /** Flushes data and resets page cache */
   async close() {
     Object.values(this.tables).forEach(async (table) => {
-      const numFullPages = Math.ceil(table.numRows / table.rowsPerPage);
+      const numFullPages = Math.ceil(table.numRows / table.pager.maxRows);
 
       for (let i = 0; i < numFullPages; i++) {
         if (table.pager.pages[i]) {

@@ -1,11 +1,12 @@
 import chalk from "chalk";
 import convertHrtime from "convert-hrtime";
+import Database from "./database";
 import logger from "./logger";
 import Parser from "./parser";
 import Table from "./table";
-import { ExecuteStatement, SqlStatement } from "./types";
+import { InsertStatement, SqlStatement } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
-import { SQL_STATEMENT_TYPE, propertyOf } from "./utils";
+import { propertyOf } from "./utils";
 
 /** Executes statements and commits to page cache */
 export default class VM {
@@ -22,7 +23,7 @@ export default class VM {
   }
 
   async #executeInsert(
-    statement: ExecuteStatement,
+    statement: InsertStatement,
     table: Table,
   ): Promise<CB.CyberliteStatus> {
     if (table.numRows >= table.maxRows) {
@@ -30,22 +31,34 @@ export default class VM {
       return propertyOf(CB.CyberliteError, (x) => x.TABLE_FULL);
     }
 
-    const [pageNum, page, cursor] = await table.getRowSlot(table.numRows);
-    this.parser.serialize(statement.row, page, cursor);
+    const [pageNum, page, cursor] = await table.getRowOffset("end");
+    this.parser.serialize(statement.data, page, cursor);
     table.pager.pages[pageNum] = page;
     table.numRows = table.numRows + 1;
+    table.endCursor.advance(table.numRows);
 
     return propertyOf(CB.Result.Execution, (x) => x.OK);
   }
 
-  async #executeSelect(table: Table): Promise<CB.CyberliteStatus> {
-    let pageNum = 0;
-    for (let i = 0; i < table.numRows; i++) {
-      pageNum = ~~(i / table.rowsPerPage);
-      const page = table.pager.pages[pageNum];
-      const [, p, cursor] = await table.getRowSlot(i);
-      const useCachedPage = !page || !page.equals(Buffer.alloc(page.length));
-      logger.log(this.parser.deserialize(useCachedPage ? page : p, cursor));
+  async #executeSelect(
+    _statement: SqlStatement,
+    table: Table,
+  ): Promise<CB.CyberliteStatus> {
+    table.startCursor.reset();
+
+    while (!table.startCursor.isTableEnd) {
+      const [pageNum, page, offset] = await table.getRowOffset("start");
+
+      if (
+        !pageNum &&
+        !offset &&
+        page.equals(Buffer.alloc(Database.PAGE_SIZE))
+      ) {
+        return propertyOf(CB.CyberliteError, (x) => x.TABLE_EMPTY);
+      }
+
+      logger.log(this.parser.deserialize(page, offset));
+      table.startCursor.advance(table.numRows);
     }
 
     return propertyOf(CB.Result.Execution, (x) => x.OK);
@@ -61,12 +74,12 @@ export default class VM {
     const startTime = process.hrtime.bigint();
     let executionResult: CB.CyberliteStatus;
 
-    switch (statement.type) {
-      case SQL_STATEMENT_TYPE.INSERT:
+    switch (statement.method) {
+      case CB.SQL_STATEMENT_METHOD.INSERT:
         try {
           const res = this.parser.parseCommand(statement.command);
           executionResult = await this.#executeInsert(
-            { ...statement, row: res } as ExecuteStatement,
+            { ...statement, data: res } as InsertStatement,
             table,
           );
         } catch (err) {
@@ -79,17 +92,23 @@ export default class VM {
           return undefined;
         }
         break;
-      case SQL_STATEMENT_TYPE.SELECT:
-        executionResult = await this.#executeSelect(table);
+      case CB.SQL_STATEMENT_METHOD.SELECT:
+        executionResult = await this.#executeSelect(
+          { method: "select", command: "*" },
+          table,
+        );
         break;
       default:
-        executionResult = "UNKNOWN_COMMAND";
+        executionResult = propertyOf(
+          CB.CyberliteError,
+          (x) => x.UNKNOWN_COMMAND,
+        );
         break;
     }
 
     if (executionResult !== propertyOf(CB.Result.Execution, (x) => x.OK)) {
       const prop =
-        executionResult === "UNKNOWN_COMMAND" ? statement.type : undefined;
+        executionResult === "UNKNOWN_COMMAND" ? statement.method : undefined;
       logger.error(executionResult as CB.CyberliteErrorStatus, {
         prop,
       });

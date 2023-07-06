@@ -1,20 +1,25 @@
+import Cursor from "./cursor";
 import Database from "./database";
 import Pager from "./pager";
 
 /** Represents a single db table */
 export default class Table {
   readonly name: string;
-  readonly rowsPerPage: number;
   readonly maxRows: number;
 
   #numRows: number;
+
+  startCursor: Cursor;
+  endCursor: Cursor;
   pager: Pager;
 
   constructor(name: string, path: string) {
     this.name = name;
-    this.rowsPerPage = ~~(Database.PAGE_SIZE / Database.MAX_ROW_SIZE);
-    this.maxRows = this.rowsPerPage * Database.TABLE_MAX_PAGES;
-    this.pager = new Pager(path);
+    this.startCursor = new Cursor(false, 0);
+    this.endCursor = new Cursor(true, this.#numRows);
+    const maxRowsPerPage = ~~(Database.PAGE_SIZE / Database.MAX_ROW_SIZE);
+    this.maxRows = maxRowsPerPage * Database.TABLE_MAX_PAGES;
+    this.pager = new Pager(path, maxRowsPerPage);
   }
 
   get numRows(): number {
@@ -27,17 +32,24 @@ export default class Table {
 
   /**
    * Retrieves the page and location for a row
-   * @param rowNum row to get location of
-   * @returns [page number, page, row start position on page]
+   * @param cursorType
+   * @returns [page number, page, row offset on page]
    */
-  async getRowSlot(rowNum: number): Promise<[number, Buffer, number]> {
-    const pageNum = ~~(rowNum / this.rowsPerPage);
-    const byteOffset = (rowNum % this.rowsPerPage) * Database.MAX_ROW_SIZE;
+  async getRowOffset(
+    cursorType: "start" | "end",
+  ): Promise<[number, Buffer, number]> {
+    const [pageNum, byteOffset] =
+      cursorType === "start"
+        ? await this.startCursor.getPosition(this.pager.maxRows)
+        : await this.endCursor.getPosition(this.pager.maxRows);
 
     const page =
-      this.pager.pages[pageNum] ?? // check page cache
-      (await this.pager.getPage(pageNum)) ?? // check db file
-      Buffer.alloc(Database.PAGE_SIZE); // create new page
+      // check page cache
+      this.pager.pages[pageNum] ??
+      // check db file
+      (await this.pager.getPage(pageNum)) ??
+      // create new page
+      Buffer.alloc(Database.PAGE_SIZE);
 
     return [pageNum, page, byteOffset];
   }

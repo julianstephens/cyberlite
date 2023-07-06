@@ -1,9 +1,9 @@
 import chalk from "chalk";
 import Database from "./database";
 import logger from "./logger";
-import { Row, SqlStatement } from "./types";
+import { Row } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
-import { SQL_STATEMENT_TYPE, propertyOf, throwError } from "./utils";
+import { propertyOf, throwError } from "./utils";
 
 /** Formats and validates SQL statements for execution */
 export default class Parser {
@@ -12,15 +12,15 @@ export default class Parser {
    * @param statement user input
    * @returns statement split into modifier + command
    */
-  static parseSqlStatement(statement: string): SqlStatement {
+  static parseSqlStatement(statement: string) {
     if (/^insert/i.test(statement)) {
       return {
-        type: SQL_STATEMENT_TYPE.INSERT,
+        method: CB.SQL_STATEMENT_METHOD.INSERT,
         command: statement.slice(6),
       };
     } else if (/^select/i.test(statement)) {
       return {
-        type: SQL_STATEMENT_TYPE.SELECT,
+        method: CB.SQL_STATEMENT_METHOD.SELECT,
         command: statement.slice(6),
       };
     } else {

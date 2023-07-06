@@ -3,7 +3,7 @@ import Database from "./database";
 import env from "./env";
 import logger from "./logger";
 import Parser from "./parser";
-import { Readline } from "./types";
+import type { Readline } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
 import { COMPLETIONS, colorize, propertyOf } from "./utils";
 

@@ -1,12 +1,6 @@
 import chalk from "chalk";
 import { Cyberlite as CB } from "./types/cyberlite";
 
-export const SQL_STATEMENT_TYPE = {
-  INSERT: "insert",
-  SELECT: "select",
-  INVALID: "invalid",
-} as const;
-
 export const COMPLETIONS = [
   "insert",
   "select",

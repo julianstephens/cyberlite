@@ -47,7 +47,8 @@
     "ts-api-utils": "~0.0.44",
     "ts-jest": "~29.1",
     "tsup": "^7.1.0",
-    "typescript": "~5.0"
+    "typescript": "~5.0",
+    "utility-types": "^3.10.0"
   },
   "volta": {
     "node": "18.12.1"

@@ -1,6 +1,6 @@
-import { SQL_STATEMENT_TYPE } from "@/utils";
 import fs from "fs";
 import readline from "node-color-readline";
+import { Cyberlite as CB } from "./cyberlite";
 
 export type EnumExtract<T> = T[keyof T];
 
@@ -9,8 +9,6 @@ type GrowToSize<T, N extends number, A extends T[]> = A["length"] extends N
   : GrowToSize<T, N, [...A, T]>;
 
 export type FixedArray<T, N extends number> = GrowToSize<T, N, []>;
-
-export type SqlStatementType = EnumExtract<typeof SQL_STATEMENT_TYPE>;
 
 export type Row = {
   id: string;
@@ -36,12 +34,12 @@ export type Table = {
 };
 
 export type SqlStatement = {
-  type: SqlStatementType;
+  method: CB.SqlStatementMethod;
   command?: string;
-  row?: Row;
+  data?: Row;
 };
 
-export type ExecuteStatement = Required<SqlStatement>;
+export type InsertStatement = Required<SqlStatement>;
 
 export type Readline = typeof readline;
 

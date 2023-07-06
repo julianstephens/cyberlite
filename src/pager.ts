@@ -9,13 +9,17 @@ import { propertyOf } from "./utils";
 /** Caches pages and writes to db file  */
 export default class Pager {
   readonly path: string;
+  readonly maxRows: number;
+
   #fileHandle: FileHandle | null = null;
+
   fileLength: number;
   pages: FixedArray<Buffer | null, 100>;
 
-  constructor(path: string) {
+  constructor(path: string, maxRows: number) {
     this.path = path;
     this.fileLength = 0;
+    this.maxRows = maxRows;
     this.pages = Array.apply(null, {
       length: Database.TABLE_MAX_PAGES,
     });
@@ -31,11 +35,7 @@ export default class Pager {
     }
   }
 
-  /**
-   * Loads pages from existing db file or creates a new one
-   * @param path location of the db file
-   * @returns file length
-   */
+  /** Loads pages from existing db file or creates a new one */
   async loadData() {
     try {
       this.#fileHandle = await fsPromises.open(this.path, "a+");

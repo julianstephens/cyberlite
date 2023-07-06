@@ -13,11 +13,13 @@ export namespace Cyberlite {
     export type SystemError = EnumExtract<typeof System>;
 
     export const Execution = {
+      TABLE_EMPTY:
+        "Execution Error: 'selection' operation failed because table empty",
       TABLE_FULL:
         "Execution Error: 'insertion' operation failed because table full",
       INVALID_SYNTAX: "Syntax Error: invalid syntax",
       MISSING_PROP: "Syntax Error: missing property",
-      UNKNOWN_COMMAND: "Sytax Error: unknown command",
+      UNKNOWN_COMMAND: "Syntax Error: unknown command",
     } as const;
     export type ExecutionError = EnumExtract<typeof Execution>;
 
@@ -48,4 +50,11 @@ export namespace Cyberlite {
   export type CyberliteStatus =
     | CyberliteErrorStatus
     | keyof typeof Result.Execution;
+
+  export const SQL_STATEMENT_METHOD = {
+    INSERT: "insert",
+    SELECT: "select",
+  } as const;
+
+  export type SqlStatementMethod = EnumExtract<typeof SQL_STATEMENT_METHOD>;
 }
