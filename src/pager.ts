@@ -28,6 +28,7 @@ export default class Pager {
 
   #handleError = (status: CB.CyberliteErrorStatus, err?: unknown) => {
     if (err) {
+      console.error(err);
       const cbErr = propertyOf(CB.CyberliteError, (x) => x[status]);
       logger.error(cbErr);
       process.exitCode = 1;
@@ -77,7 +78,7 @@ export default class Pager {
 
     if (pageNum <= numPages) {
       try {
-        this.#fileHandle = await fsPromises.open(this.path, "w");
+        this.#fileHandle = await fsPromises.open(this.path, "a+");
         const { size } = await this.#fileHandle.stat();
         if (size && size > 0) {
           const res = await this.#fileHandle.read(
@@ -108,13 +109,15 @@ export default class Pager {
     }
 
     try {
-      this.#fileHandle = await fsPromises.open(this.path, "w");
+      this.#fileHandle = await fsPromises.open(this.path, "a+");
       await this.#fileHandle.write(
         this.pages[pageNum],
         0,
         Database.PAGE_SIZE,
         pageNum * Database.PAGE_SIZE,
       );
+      const { size } = await this.#fileHandle.stat();
+      this.fileLength = size;
     } catch (err) {
       this.#handleError("IOERR_OPEN", err);
     } finally {
