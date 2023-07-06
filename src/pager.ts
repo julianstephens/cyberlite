@@ -21,7 +21,7 @@ export default class Pager {
     });
   }
 
-  #handleError = (status: CB.CyberliteErrorStatus, err?: unknown) => {
+  #handleError(status: CB.CyberliteErrorStatus, err?: unknown) {
     if (err) {
       console.error(err);
       const cbErr = propertyOf(CB.CyberliteError, (x) => x[status]);
@@ -29,14 +29,14 @@ export default class Pager {
       process.exitCode = 1;
       throw new Error(cbErr);
     }
-  };
+  }
 
   /**
    * Loads pages from existing db file or creates a new one
    * @param path location of the db file
    * @returns file length
    */
-  loadData = async () => {
+  async loadData() {
     try {
       this.#fileHandle = await fsPromises.open(this.path, "a+");
       const { size } = await this.#fileHandle.stat();
@@ -55,14 +55,14 @@ export default class Pager {
       await this.#fileHandle?.close();
       this.#fileHandle = null;
     }
-  };
+  }
 
   /**
    * Checks for page in cache or reads from db file
    * @param pageNum page to retrieve
    * @returns requested buffer
    */
-  getPage = async (pageNum: number) => {
+  async getPage(pageNum: number) {
     if (pageNum > Database.TABLE_MAX_PAGES) {
       this.#handleError("TABLE_FULL", true);
     }
@@ -95,13 +95,13 @@ export default class Pager {
       }
     }
     return parsedPage;
-  };
+  }
 
   /**
    * Commits changes in page cache
    * @param pageNum
    */
-  flush = async (pageNum: number) => {
+  async flush(pageNum: number) {
     if (!this.pages[pageNum]) {
       this.#handleError("CYBERLITE_INTERNAL", true);
     }
@@ -122,5 +122,5 @@ export default class Pager {
       await this.#fileHandle?.close();
       this.#fileHandle = null;
     }
-  };
+  }
 }

@@ -30,7 +30,7 @@ export default class Table {
    * @param rowNum row to get location of
    * @returns [page number, page, row start position on page]
    */
-  getRowSlot = async (rowNum: number): Promise<[number, Buffer, number]> => {
+  async getRowSlot(rowNum: number): Promise<[number, Buffer, number]> {
     const pageNum = ~~(rowNum / this.rowsPerPage);
     const byteOffset = (rowNum % this.rowsPerPage) * Database.MAX_ROW_SIZE;
 
@@ -40,5 +40,5 @@ export default class Table {
       Buffer.alloc(Database.PAGE_SIZE); // create new page
 
     return [pageNum, page, byteOffset];
-  };
+  }
 }

@@ -20,7 +20,7 @@ export default class Database {
    * Opens db file and loads tables
    * @param path location of the db file
    */
-  open = async (path: string) => {
+  async open(path: string) {
     this.vm = new VM();
 
     const table = new Table("users", path);
@@ -28,10 +28,10 @@ export default class Database {
     table.numRows = ~~(table.pager.fileLength / Database.MAX_ROW_SIZE);
     this.tables["users"] = table;
     this.activeTable = table;
-  };
+  }
 
   /** Flushes data and resets page cache */
-  close = async () => {
+  async close() {
     Object.values(this.tables).forEach(async (table) => {
       const numFullPages = Math.ceil(table.numRows / table.rowsPerPage);
 
@@ -46,7 +46,7 @@ export default class Database {
         if (p) table.pager.pages[i] = null;
       });
     });
-  };
+  }
 
   get activeTable(): Table {
     return this.#activeTable;

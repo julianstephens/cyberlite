@@ -34,13 +34,13 @@ export default class CyberliteRepl {
   }
 
   /** Starts REPL session */
-  start = () => {
+  start() {
     logger.welcome();
     this.run();
-  };
+  }
 
   /** Closes db connection and quits repl */
-  stop = async () => {
+  async stop() {
     try {
       await this.db.close();
     } catch (err) {
@@ -50,10 +50,10 @@ export default class CyberliteRepl {
     if (env.NODE_ENV === "test") {
       return this.rl.close();
     }
-  };
+  }
 
   /** Loops REPL session until terminated by user */
-  run = async () => {
+  async run() {
     for await (const command of this.repl()) {
       if (/^\.exit/.test(`${command}`)) {
         await this.stop();
@@ -80,7 +80,7 @@ export default class CyberliteRepl {
         }
       }
     }
-  };
+  }
 
   *repl() {
     const rl = readline.createInterface({

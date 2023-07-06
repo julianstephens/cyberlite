@@ -12,7 +12,7 @@ export default class Parser {
    * @param statement user input
    * @returns statement split into modifier + command
    */
-  static parseSqlStatement = (statement: string): SqlStatement => {
+  static parseSqlStatement(statement: string): SqlStatement {
     if (/^insert/i.test(statement)) {
       return {
         type: SQL_STATEMENT_TYPE.INSERT,
@@ -26,7 +26,7 @@ export default class Parser {
     } else {
       return throwError("UNKNOWN_COMMAND", statement);
     }
-  };
+  }
 
   /**
    * Ensures string is valid varchar of specified size
@@ -35,11 +35,7 @@ export default class Parser {
    * @param prop associated column name
    * @throws { name: "INVALID_SYNTAX", message: string; }
    */
-  validateCharacterLength = (
-    text: string,
-    maxCharacters: number,
-    prop: string,
-  ) => {
+  validateCharacterLength(text: string, maxCharacters: number, prop: string) {
     if (text.length > maxCharacters)
       throwError(
         propertyOf(CB.CyberliteError, (x) => x.INVALID_SYNTAX),
@@ -47,14 +43,14 @@ export default class Parser {
           maxCharacters,
         )}' characters`,
       );
-  };
+  }
 
   /**
    * Converts parsed SQL command to table row
    * @param command user input
    * @returns formatted row for insertion
    */
-  parseCommand = (command?: string): Row => {
+  parseCommand(command?: string): Row {
     const missingStatus = propertyOf(CB.CyberliteError, (x) => x.MISSING_PROP);
     const invalidStatus = propertyOf(
       CB.CyberliteError,
@@ -93,7 +89,7 @@ export default class Parser {
     });
 
     return rawArgs;
-  };
+  }
 
   /**
    * Converts table row to bytes and copies to destination buffer
@@ -101,10 +97,10 @@ export default class Parser {
    * @param destination buffer to copy to
    * @param cursor offset in bytes to begin copying in destination buffer
    */
-  serialize = (source: Row, destination: Buffer, cursor: number) => {
+  serialize(source: Row, destination: Buffer, cursor: number) {
     const s = Buffer.from(Object.values(source).join(" "));
     s.copy(destination, cursor);
-  };
+  }
 
   /**
    * Converts byte data to utf-8 strings for display
@@ -112,7 +108,7 @@ export default class Parser {
    * @param cursor offset in source to begin reading from
    * @returns table row as tuple
    */
-  deserialize = (source: Buffer, cursor: number) => {
+  deserialize(source: Buffer, cursor: number) {
     const row = source.subarray(cursor, cursor + Database.MAX_ROW_SIZE);
     return row
       .toString()
@@ -120,5 +116,5 @@ export default class Parser {
       .replace(/\x00/g, "")
       .split(" ")
       .map((el) => el);
-  };
+  }
 }
