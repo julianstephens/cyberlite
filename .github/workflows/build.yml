@@ -1,6 +1,6 @@
 name: Build
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -13,6 +13,12 @@ jobs:
         with:
           version: 8
       - run: pnpm i
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_MAX_TABLE_ROWS: 100
+          envkey_NODE_ENV: "production"
+          envkey_PAGE_SIZE: 4096
       - run: pnpm lint
       - run: pnpm format
       - run: pnpm test
