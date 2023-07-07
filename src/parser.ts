@@ -1,6 +1,5 @@
 import chalk from "chalk";
 import Database from "./database";
-import logger from "./logger";
 import { Row } from "./types";
 import { Cyberlite as CB } from "./types/cyberlite";
 import { propertyOf, throwError } from "./utils";
@@ -56,7 +55,7 @@ export default class Parser {
       CB.CyberliteError,
       (x) => x.INVALID_SYNTAX,
     );
-    let foundMissing = false;
+
     if (!command)
       throwError(invalidStatus, "Empty 'insert' statement provided");
     const [id, username, email] = command
@@ -65,7 +64,6 @@ export default class Parser {
       .filter((el) => el)
       .map((el) => el.trim());
 
-    if (!id) throwError(missingStatus, "id");
     if (!username) throwError(missingStatus, "username");
     if (!email) throwError(missingStatus, "email");
 
@@ -76,19 +74,11 @@ export default class Parser {
     this.validateCharacterLength(username, 35, "username");
     this.validateCharacterLength(email, 255, "email");
 
-    const rawArgs: Row = {
+    return {
       id,
       username,
       email,
     };
-    Object.entries(rawArgs).forEach(([k, v]) => {
-      if (!v) {
-        logger.error(missingStatus, { prop: k });
-        if (!foundMissing) foundMissing = true;
-      }
-    });
-
-    return rawArgs;
   }
 
   /**

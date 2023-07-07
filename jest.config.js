@@ -6,16 +6,23 @@ export default {
     '^.+\\.m?[tj]s?$': ['ts-jest', { useESM: true }],
   },
   transformIgnorePatterns: ["/node_modules/.pnpm/(chalk*)/"],
+  moduleDirectories: ["node_modules", "src"],
   moduleNameMapper: {
     '^@/(.*)$': "<rootDir>/src/$1",
     '^(\\.{1,2}/.*)\\.(m)?js$': '$1',
   },
-  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(m)?ts$',
+  testMatch: ['**/*.test.ts'],
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'src/**/*.ts',
     'src/**/*.mts',
+    '!src/main.ts',
+    '!src/repl.ts',
+    '!src/utils.ts',
+    '!src/env.ts',
+    '!src/types/**/*.ts',
     '!src/**/*.d.ts',
     '!src/**/*.d.mts',
   ],
+  restoreMocks: true
 };

@@ -17,9 +17,8 @@ export default class Table {
     this.name = name;
     this.startCursor = new Cursor(false, 0);
     this.endCursor = new Cursor(true, this.#numRows);
-    const maxRowsPerPage = ~~(Database.PAGE_SIZE / Database.MAX_ROW_SIZE);
-    this.maxRows = maxRowsPerPage * Database.TABLE_MAX_PAGES;
-    this.pager = new Pager(path, maxRowsPerPage);
+    this.maxRows = ~~(Database.PAGE_SIZE / Database.MAX_ROW_SIZE);
+    this.pager = new Pager(path, this.maxRows);
   }
 
   get numRows(): number {

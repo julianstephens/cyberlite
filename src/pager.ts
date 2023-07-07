@@ -27,9 +27,8 @@ export default class Pager {
 
   #handleError(status: CB.CyberliteErrorStatus, err?: unknown) {
     if (err) {
-      console.error(err);
       const cbErr = propertyOf(CB.CyberliteError, (x) => x[status]);
-      logger.error(cbErr);
+      logger.error(cbErr, { useDefault: true });
       process.exitCode = 1;
       throw new Error(cbErr);
     }
@@ -72,6 +71,7 @@ export default class Pager {
     let numPages = ~~(this.fileLength / Database.PAGE_SIZE);
     let parsedPage: Buffer;
 
+    // check for partial page
     if (this.fileLength % Database.PAGE_SIZE) numPages++;
 
     if (pageNum <= numPages) {
@@ -90,7 +90,7 @@ export default class Pager {
       } catch (err) {
         this.#handleError("IOERR_READ", err);
       } finally {
-        this.#fileHandle?.close();
+        await this.#fileHandle?.close();
         this.#fileHandle = null;
       }
     }

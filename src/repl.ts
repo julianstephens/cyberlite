@@ -23,23 +23,24 @@ export default class CyberliteRepl {
         return [hits.length ? hits : COMPLETIONS, line];
       },
     });
-    this.db = new Database();
-    this.db.open(path).catch((err) => {
-      console.error(err);
+    this.db = new Database(path);
+  }
+
+  /** Starts REPL session */
+  async start() {
+    logger.welcome();
+    try {
+      await this.db.open();
+      await this.run();
+    } catch {
       logger.error("CYBERLITE_INTERNAL", {
         message: "Could not initialize database",
       });
       throw new Error("Could not initialize database");
-    });
+    }
   }
 
-  /** Starts REPL session */
-  start() {
-    logger.welcome();
-    this.run();
-  }
-
-  /** Closes db connection and quits repl */
+  /** Closes db connection and quits REPL session */
   async stop() {
     try {
       await this.db.close();

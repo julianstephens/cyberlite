@@ -2,9 +2,7 @@ import env from "./env";
 import Table from "./table";
 import VM from "./vm";
 
-/**
- * Handles the database file
- */
+/** Handles the database file */
 export default class Database {
   vm: VM;
   tables: Record<string, Table> = {};
@@ -16,20 +14,22 @@ export default class Database {
   // TODO: hardcoded until dynamic tables implemented
   static readonly MAX_ROW_SIZE: number = 1165;
 
+  constructor(path: string) {
+    this.vm = new VM();
+    const table = new Table("users", path);
+    this.tables["users"] = table;
+    this.activeTable = table;
+  }
+
   /**
    * Opens db file and loads tables
    * @param path location of the db file
    */
-  async open(path: string) {
-    this.vm = new VM();
-
-    const table = new Table("users", path);
-    await table.pager.loadData();
-    table.numRows = table.endCursor.currentRow = ~~(
-      table.pager.fileLength / Database.MAX_ROW_SIZE
+  async open() {
+    await this.activeTable.pager.loadData();
+    this.activeTable.numRows = this.activeTable.endCursor.currentRow = ~~(
+      this.activeTable.pager.fileLength / Database.MAX_ROW_SIZE
     );
-    this.tables["users"] = table;
-    this.activeTable = table;
   }
 
   /** Flushes data and resets page cache */

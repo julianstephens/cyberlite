@@ -13,8 +13,13 @@ class Logger {
     );
   }
 
-  #handleError(error: string, message: string) {
-    console.log(`${chalk.red(error + ":")} ${message}`);
+  #handleError(error: string, message: string, useDefault = false) {
+    if (useDefault) {
+      const split = message.split(":");
+      console.log(`${chalk.red(split[0].trim() + ": ")}${split[1].trim()}`);
+    } else {
+      console.log(`${chalk.red(error + ": ")}${message}`);
+    }
   }
 
   /** Prints help message with available commands */
@@ -53,7 +58,11 @@ class Logger {
         );
         break;
       default:
-        this.#handleError(error, options?.message || CB.CyberliteError[error]);
+        this.#handleError(
+          error,
+          options?.message || CB.CyberliteError[error],
+          options?.useDefault,
+        );
         break;
     }
   }

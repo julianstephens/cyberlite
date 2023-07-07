@@ -14,8 +14,8 @@ program
     "[path]",
     "The location of the database file to read from or create.",
   )
-  .action((path: string) => {
-    new CyberliteRepl(path).start();
+  .action(async (path: string) => {
+    await new CyberliteRepl(path).start();
   })
   .parse(process.argv);
 

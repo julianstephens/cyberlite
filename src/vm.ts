@@ -88,6 +88,7 @@ export default class VM {
             propertyOf(CB.CyberliteError, (x) => x.MISSING_PROP)
               ? { prop: err.message }
               : { message: err.message }),
+            useDefault: true,
           });
           return undefined;
         }
@@ -111,6 +112,7 @@ export default class VM {
         executionResult === "UNKNOWN_COMMAND" ? statement.method : undefined;
       logger.error(executionResult as CB.CyberliteErrorStatus, {
         prop,
+        useDefault: true,
       });
       return undefined;
     }

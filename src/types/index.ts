@@ -1,4 +1,3 @@
-import fs from "fs";
 import readline from "node-color-readline";
 import { Cyberlite as CB } from "./cyberlite";
 
@@ -18,21 +17,7 @@ export type Row = {
 
 export type Pages = FixedArray<Buffer | null, 100>;
 
-export type Pager = {
-  fileDescriptor: number;
-  fileLength: number;
-  rs: fs.ReadStream;
-  ws: fs.WriteStream;
-  pages: Pages;
-};
-
-export type Table = {
-  rowsPerPage: number;
-  maxRows: number;
-  numRows: number;
-  pager: Pager;
-};
-
+// TODO: command should no longer be optional
 export type SqlStatement = {
   method: CB.SqlStatementMethod;
   command?: string;
@@ -44,6 +29,7 @@ export type InsertStatement = Required<SqlStatement>;
 export type Readline = typeof readline;
 
 export type ErrorOptions = {
+  useDefault?: boolean;
   message?: string;
   prop?: string;
   propType?: string;
